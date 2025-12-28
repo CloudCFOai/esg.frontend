@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudCFO - ESG Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header style="background:white; border-bottom:1px solid #e5e7eb; padding:12px 24px; position:sticky; top:0; z-index:100;">
+    <div style="max-width:1400px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:32px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div style="width:32px; height:32px; background:linear-gradient(135deg,#22c55e,#0d9488); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                    <svg style="width:18px; height:18px; color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                </div>
+                <span style="font-weight:700; font-size:18px; color:#1f2937;">CloudCFO</span>
+            </div>
+            <nav style="display:flex; gap:4px;">
+                <a href="#" style="padding:8px 16px; color:#6b7280; text-decoration:none; font-size:14px;">Intelligence</a>
+                <a href="#" style="padding:8px 16px; color:#6b7280; text-decoration:none; font-size:14px;">Accounting</a>
+                <a href="#" style="padding:8px 16px; color:#6b7280; text-decoration:none; font-size:14px;">Banking & Payments</a>
+                <a href="#" style="padding:8px 16px; background:#dcfce7; color:#15803d; text-decoration:none; font-size:14px; border-radius:8px; font-weight:500;">ESG</a>
+            </nav>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="padding:8px 16px; background:linear-gradient(135deg,#22c55e,#0d9488); color:white; border-radius:12px; font-weight:600; font-size:14px;">ESG Score: 78/100</div>
+            <div style="width:32px; height:32px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#15803d; font-weight:600; font-size:14px;">A</div>
+        </div>
+    </div>
+</header>
+
+<main style="max-width:1400px; margin:0 auto; padding:24px;">
+
+    <!-- PAGE TITLE -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div>
+            <p style="font-size:14px; color:#6b7280; margin:0 0 4px 0;">Dashboard → ESG & Sustainability</p>
+            <h1 style="font-size:24px; font-weight:700; color:#111827; margin:0;">ESG & Sustainability Dashboard</h1>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <select style="padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:white;"><option>Quarter</option><option>Annual</option></select>
+            <select style="padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:white;"><option>GRI Standards</option><option>SASB</option></select>
+            <button style="padding:8px 16px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; background:white; cursor:pointer;">Export</button>
+            <button style="padding:8px 16px; background:#16a34a; color:white; border:none; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer;">Generate ESG Report</button>
+        </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;">
+        <div class="card" style="padding:20px; border-left:4px solid #22c55e;">
+            <p style="font-size:14px; color:#6b7280; margin:0;">Total CO2 Emissions</p>
+            <p style="font-size:28px; font-weight:700; color:#111827; margin:8px 0;">1,247 <span style="font-size:14px; font-weight:400;">tCO2e</span></p>
+            <p style="font-size:14px; color:#16a34a; margin:0;">↓ -18.3% vs 2023 baseline</p>
+        </div>
+        <div class="card" style="padding:20px; border-left:4px solid #3b82f6;">
+            <p style="font-size:14px; color:#6b7280; margin:0;">Carbon Intensity</p>
+            <p style="font-size:28px; font-weight:700; color:#111827; margin:8px 0;">14.7 <span style="font-size:14px; font-weight:400;">tCO2e/$M</span></p>
+            <p style="font-size:14px; color:#16a34a; margin:0;">34% below industry avg</p>
+        </div>
+        <div class="card" style="padding:20px; border-left:4px solid #0d9488;">
+            <p style="font-size:14px; color:#6b7280; margin:0;">ESG Score</p>
+            <p style="font-size:28px; font-weight:700; color:#111827; margin:8px 0;">78<span style="font-size:14px; font-weight:400;">/100</span></p>
+            <div style="display:flex; gap:12px; font-size:12px;"><span style="color:#16a34a;">E:82</span><span style="color:#3b82f6;">S:75</span><span style="color:#8b5cf6;">G:77</span></div>
+        </div>
+        <div class="card" style="padding:20px; border-left:4px solid #f59e0b;">
+            <p style="font-size:14px; color:#6b7280; margin:0;">Offset Progress</p>
+            <p style="font-size:28px; font-weight:700; color:#111827; margin:8px 0;">67%</p>
+            <div style="width:100%; height:8px; background:#fef3c7; border-radius:4px;"><div style="width:67%; height:8px; background:linear-gradient(90deg,#f59e0b,#22c55e); border-radius:4px;"></div></div>
+            <p style="font-size:12px; color:#6b7280; margin:4px 0 0 0;">836 tCO2e offset • 411 credits left</p>
+        </div>
+    </div>
+
+    <!-- MAIN LAYOUT: LEFT + RIGHT -->
+    <div style="display:flex; gap:24px;">
+        
+        <!-- LEFT COLUMN (75%) -->
+        <div style="flex:3;">
+
+            <!-- CARBON ACCOUNTING -->
+            <div class="card" style="margin-bottom:24px;">
+                <div style="padding:20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h2 style="font-size:18px; font-weight:700; color:#111827; margin:0;">Carbon Accounting</h2>
+                        <p style="font-size:14px; color:#6b7280; margin:4px 0 0 0;">Emissions tracking and analysis</p>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <span style="padding:4px 10px; background:#22c55e; color:white; font-size:12px; border-radius:20px;">92% Verified</span>
+                        <span style="padding:4px 10px; background:#f59e0b; color:white; font-size:12px; border-radius:20px;">8% Estimated</span>
+                    </div>
+                </div>
+                <div style="padding:20px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+                    <!-- Scope Chart -->
+                    <div style="background:#f9fafb; border-radius:12px; padding:16px;">
+                        <h3 style="font-size:14px; font-weight:600; color:#374151; margin:0 0 12px 0;">Emissions by Scope</h3>
+                        <div style="display:flex; justify-content:center;"><canvas id="scopeChart" width="140" height="140"></canvas></div>
+                        <div style="margin-top:12px;">
+                            <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span>● Scope 1 (Direct)</span><span style="font-weight:600;">187 tCO2e</span></div>
+                            <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span style="color:#3b82f6;">● Scope 2 (Energy)</span><span style="font-weight:600;">312 tCO2e</span></div>
+                            <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span style="color:#d97706;">● Scope 3 (Value Chain)</span><span style="font-weight:600;">748 tCO2e</span></div>
+                        </div>
+                    </div>
+                    <!-- Trend Chart -->
+                    <div style="background:#f9fafb; border-radius:12px; padding:16px;">
+                        <h3 style="font-size:14px; font-weight:600; color:#374151; margin:0 0 12px 0;">Monthly Trend</h3>
+                        <div style="height:180px;"><canvas id="trendChart"></canvas></div>
+                    </div>
+                    <!-- Categories -->
+                    <div style="background:#f9fafb; border-radius:12px; padding:16px;">
+                        <h3 style="font-size:14px; font-weight:600; color:#374151; margin:0 0 12px 0;">By Category</h3>
+                        <div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Energy & Utilities</span><span style="font-weight:600;">412 tCO2e</span></div><div style="height:8px; background:#e5e7eb; border-radius:4px;"><div style="width:33%; height:8px; background:#22c55e; border-radius:4px;"></div></div></div>
+                        <div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Business Travel</span><span style="font-weight:600;">298 tCO2e</span></div><div style="height:8px; background:#e5e7eb; border-radius:4px;"><div style="width:24%; height:8px; background:#3b82f6; border-radius:4px;"></div></div></div>
+                        <div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Supply Chain</span><span style="font-weight:600;">287 tCO2e</span></div><div style="height:8px; background:#e5e7eb; border-radius:4px;"><div style="width:23%; height:8px; background:#d97706; border-radius:4px;"></div></div></div>
+                        <div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Employee Commuting</span><span style="font-weight:600;">156 tCO2e</span></div><div style="height:8px; background:#e5e7eb; border-radius:4px;"><div style="width:12.5%; height:8px; background:#8b5cf6; border-radius:4px;"></div></div></div>
+                        <div><div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Data Centers</span><span style="font-weight:600;">94 tCO2e</span></div><div style="height:8px; background:#e5e7eb; border-radius:4px;"><div style="width:7.5%; height:8px; background:#0d9488; border-radius:4px;"></div></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E/S/G PANELS -->
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
+                
+                <!-- ENVIRONMENTAL -->
+                <div class="card">
+                    <div style="padding:16px; background:linear-gradient(90deg,#dcfce7,white); border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:12px;">
+                        <div style="width:36px; height:36px; background:#22c55e; border-radius:8px; display:flex; align-items:center; justify-content:center;"><svg style="width:18px; height:18px; color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div>
+                        <div><h3 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Environmental</h3><p style="font-size:12px; color:#6b7280; margin:0;">Score: 82/100</p></div>
+                    </div>
+                    <div style="padding:16px;">
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Energy Consumption</span><span style="font-weight:600;">847,320 kWh</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Renewable Energy %</span><span style="font-weight:600; color:#16a34a;">42%</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Water Usage</span><span style="font-weight:600;">12,450 m³</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Recycling Rate</span><span style="font-weight:600; color:#16a34a;">78%</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Landfill Diversion</span><span style="font-weight:600;">92%</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:#dcfce7; border:1px solid #bbf7d0; border-radius:8px; font-size:13px;"><span style="color:#15803d; font-weight:600;">ISO 14001</span><span style="padding:2px 8px; background:#22c55e; color:white; border-radius:20px; font-size:11px;">Certified</span></div>
+                    </div>
+                </div>
+
+                <!-- SOCIAL -->
+                <div class="card">
+                    <div style="padding:16px; background:linear-gradient(90deg,#dbeafe,white); border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:12px;">
+                        <div style="width:36px; height:36px; background:#3b82f6; border-radius:8px; display:flex; align-items:center; justify-content:center;"><svg style="width:18px; height:18px; color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+                        <div><h3 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Social</h3><p style="font-size:12px; color:#6b7280; margin:0;">Score: 75/100</p></div>
+                    </div>
+                    <div style="padding:16px;">
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Workforce Diversity</span><span style="font-weight:600;">43% F / 57% M</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Employee Satisfaction</span><span style="font-weight:600; color:#2563eb;">4.2/5.0</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Training Hours/Employee</span><span style="font-weight:600;">24 hrs</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Safety Incidents (YTD)</span><span style="font-weight:600; color:#16a34a;">0</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Community Investment</span><span style="font-weight:600;">$125,000</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; font-size:13px;"><span style="color:#4b5563;">Supply Chain Compliance</span><span style="font-weight:600; color:#2563eb;">94%</span></div>
+                    </div>
+                </div>
+
+                <!-- GOVERNANCE -->
+                <div class="card">
+                    <div style="padding:16px; background:linear-gradient(90deg,#ede9fe,white); border-bottom:1px solid #e5e7eb; display:flex; align-items:center; gap:12px;">
+                        <div style="width:36px; height:36px; background:#8b5cf6; border-radius:8px; display:flex; align-items:center; justify-content:center;"><svg style="width:18px; height:18px; color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+                        <div><h3 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Governance</h3><p style="font-size:12px; color:#6b7280; margin:0;">Score: 77/100</p></div>
+                    </div>
+                    <div style="padding:16px;">
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Board Diversity</span><span style="font-weight:600;">40% diverse</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Ethics Training</span><span style="font-weight:600; color:#16a34a;">98%</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">GDPR Compliance</span><span style="padding:2px 8px; background:#22c55e; color:white; border-radius:20px; font-size:11px;">Compliant</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">CCPA Compliance</span><span style="padding:2px 8px; background:#22c55e; color:white; border-radius:20px; font-size:11px;">Compliant</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span style="color:#4b5563;">Whistleblower Reports</span><span style="font-weight:600;">2 (resolved)</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; font-size:13px;"><span style="color:#4b5563;">CEO Pay Ratio</span><span style="font-weight:600;">24:1</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GOALS & OFFSETTING -->
+            <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:24px;">
+                
+                <!-- GOALS -->
+                <div class="card">
+                    <div style="padding:20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Goals & Targets Tracker</h2>
+                        <a href="#" style="font-size:14px; color:#16a34a; text-decoration:none; font-weight:500;">Edit Goals</a>
+                    </div>
+                    <div style="padding:20px;">
+                        <div style="margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="font-size:14px; font-weight:500;">Net Zero Roadmap</span><span style="font-size:14px; color:#16a34a; font-weight:500;">Target: 2040</span></div>
+                            <div style="height:16px; background:#e5e7eb; border-radius:8px; position:relative;">
+                                <div style="width:35%; height:16px; background:linear-gradient(90deg,#4ade80,#16a34a); border-radius:8px;"></div>
+                                <div style="position:absolute; left:35%; top:-2px; width:20px; height:20px; background:#16a34a; border-radius:50%; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.2);"></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:11px; color:#6b7280;"><span>2020</span><span>2030</span><span>2040</span></div>
+                        </div>
+                        <div style="background:#dcfce7; border:1px solid #bbf7d0; border-radius:8px; padding:12px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:8px;"><span style="width:24px; height:24px; background:#22c55e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">✓</span><span style="font-weight:600; color:#166534;">Short-term (2025)</span></div>
+                                <span style="padding:2px 8px; background:#22c55e; color:white; border-radius:20px; font-size:11px;">On Track</span>
+                            </div>
+                            <p style="font-size:12px; color:#15803d; margin:8px 0 0 32px;">25% reduction Scope 1 & 2 • <strong>82% complete</strong></p>
+                        </div>
+                        <div style="background:#dbeafe; border:1px solid #93c5fd; border-radius:8px; padding:12px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:8px;"><span style="width:24px; height:24px; background:#3b82f6; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:700;">2</span><span style="font-weight:600; color:#1e40af;">Medium-term (2030)</span></div>
+                                <span style="padding:2px 8px; background:#3b82f6; color:white; border-radius:20px; font-size:11px;">In Progress</span>
+                            </div>
+                            <p style="font-size:12px; color:#1d4ed8; margin:8px 0 0 32px;">50% reduction all scopes • <strong>35% complete</strong></p>
+                        </div>
+                        <div style="background:#f3f4f6; border:1px solid #d1d5db; border-radius:8px; padding:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:8px;"><span style="width:24px; height:24px; background:#9ca3af; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:11px; font-weight:700;">3</span><span style="font-weight:600; color:#374151;">Long-term (2040)</span></div>
+                                <span style="padding:2px 8px; background:#9ca3af; color:white; border-radius:20px; font-size:11px;">Planned</span>
+                            </div>
+                            <p style="font-size:12px; color:#4b5563; margin:8px 0 0 32px;">Net Zero • Science-based target</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OFFSETTING -->
+                <div class="card">
+                    <div style="padding:20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Offsetting & Credits</h2>
+                        <a href="#" style="font-size:14px; color:#16a34a; text-decoration:none; font-weight:500;">Purchase Credits</a>
+                    </div>
+                    <div style="padding:20px;">
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
+                            <div style="text-align:center; padding:12px; background:#dcfce7; border-radius:12px;"><div style="width:40px; height:40px; background:#bbf7d0; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center;"><svg style="width:20px; height:20px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div><p style="font-size:20px; font-weight:700; color:#166534; margin:0;">520</p><p style="font-size:11px; color:#4b5563; margin:0;">Forestry</p></div>
+                            <div style="text-align:center; padding:12px; background:#dbeafe; border-radius:12px;"><div style="width:40px; height:40px; background:#bfdbfe; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center;"><svg style="width:20px; height:20px; color:#2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><p style="font-size:20px; font-weight:700; color:#1e40af; margin:0;">216</p><p style="font-size:11px; color:#4b5563; margin:0;">Renewable</p></div>
+                            <div style="text-align:center; padding:12px; background:#fef3c7; border-radius:12px;"><div style="width:40px; height:40px; background:#fde68a; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center;"><svg style="width:20px; height:20px; color:#d97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945"/></svg></div><p style="font-size:20px; font-weight:700; color:#92400e; margin:0;">100</p><p style="font-size:11px; color:#4b5563; margin:0;">Other</p></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span>Total Credits Purchased</span><span style="font-weight:600;">836 tCO2e</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span>Credits Retired</span><span style="font-weight:600;">425 tCO2e</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span>Avg. Cost/Tonne</span><span style="font-weight:600;">$24.50</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:8px; background:#dcfce7; border:1px solid #bbf7d0; border-radius:8px; font-size:13px;"><span style="font-weight:600; color:#166534;">Total Investment</span><span style="font-weight:700; color:#166534;">$20,482</span></div>
+                        <div style="margin-top:16px; padding-top:16px; border-top:1px solid #e5e7eb;">
+                            <p style="font-size:11px; color:#6b7280; margin:0 0 8px 0;">Verified Providers</p>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;"><span style="padding:4px 8px; background:#f3f4f6; border-radius:4px; font-size:11px;">Verra VCS</span><span style="padding:4px 8px; background:#f3f4f6; border-radius:4px; font-size:11px;">Gold Standard</span><span style="padding:4px 8px; background:#f3f4f6; border-radius:4px; font-size:11px;">ACR</span><span style="padding:4px 8px; background:#f3f4f6; border-radius:4px; font-size:11px;">CAR</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTING & SUPPLY CHAIN -->
+            <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:24px;">
+                
+                <!-- REPORTING -->
+                <div class="card">
+                    <div style="padding:20px; border-bottom:1px solid #e5e7eb;"><h2 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Reporting & Disclosure Center</h2></div>
+                    <div style="padding:20px;">
+                        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px;">
+                            <button style="padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:white; cursor:pointer; text-align:left;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><svg style="width:16px; height:16px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span style="font-weight:600; font-size:13px;">Sustainability Report</span></div><p style="font-size:11px; color:#6b7280; margin:0;">Annual GRI-aligned</p></button>
+                            <button style="padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:white; cursor:pointer; text-align:left;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><svg style="width:16px; height:16px; color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span style="font-weight:600; font-size:13px;">CDP Response</span></div><p style="font-size:11px; color:#6b7280; margin:0;">Climate disclosure</p></button>
+                            <button style="padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:white; cursor:pointer; text-align:left;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><svg style="width:16px; height:16px; color:#8b5cf6;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span style="font-weight:600; font-size:13px;">TCFD Disclosure</span></div><p style="font-size:11px; color:#6b7280; margin:0;">Climate risk</p></button>
+                            <button style="padding:12px; border:1px solid #fbbf24; border-radius:8px; background:#fffbeb; cursor:pointer; text-align:left;"><div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><svg style="width:16px; height:16px; color:#d97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg><span style="font-weight:600; font-size:13px; color:#92400e;">Carbon Passport</span></div><p style="font-size:11px; color:#b45309; margin:0;">EU CBAM compliant</p></button>
+                        </div>
+                        <div style="padding:12px; background:#f9fafb; border-radius:8px;">
+                            <p style="font-size:12px; font-weight:600; color:#374151; margin:0 0 8px 0;">Filing Calendar</p>
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>Annual Report</span><span>Mar 31, 2025</span></div>
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>CDP Submission</span><span style="color:#d97706; font-weight:500;">Jul 31, 2025</span></div>
+                            <div style="display:flex; justify-content:space-between; font-size:13px;"><span>EU CBAM Report</span><span style="color:#dc2626; font-weight:500;">Jan 31, 2025</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUPPLY CHAIN -->
+                <div class="card">
+                    <div style="padding:20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;"><h2 style="font-size:16px; font-weight:700; color:#111827; margin:0;">Supply Chain Sustainability</h2><span style="padding:4px 10px; background:#fef3c7; color:#92400e; border-radius:20px; font-size:11px;">2 High Risk</span></div>
+                    <div style="padding:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f9fafb; border-radius:8px; margin-bottom:8px;"><div style="display:flex; align-items:center; gap:12px;"><div style="width:32px; height:32px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#166534; font-weight:700; font-size:13px;">A</div><div><p style="font-weight:600; font-size:13px; margin:0;">Acme Materials</p><p style="font-size:11px; color:#6b7280; margin:0;">Scope 3: 124 tCO2e</p></div></div><span style="padding:4px 10px; background:#dcfce7; color:#166534; border-radius:20px; font-size:11px; font-weight:500;">Score: 85</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#fef3c7; border:1px solid #fde68a; border-radius:8px; margin-bottom:8px;"><div style="display:flex; align-items:center; gap:12px;"><div style="width:32px; height:32px; background:#fde68a; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#92400e; font-weight:700; font-size:13px;">G</div><div><p style="font-weight:600; font-size:13px; margin:0;">GlobalParts Inc</p><p style="font-size:11px; color:#b45309; margin:0;">Scope 3: 87 tCO2e • High risk</p></div></div><span style="padding:4px 10px; background:#fde68a; color:#92400e; border-radius:20px; font-size:11px; font-weight:500;">Score: 42</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#fee2e2; border:1px solid #fecaca; border-radius:8px; margin-bottom:8px;"><div style="display:flex; align-items:center; gap:12px;"><div style="width:32px; height:32px; background:#fecaca; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#991b1b; font-weight:700; font-size:13px;">M</div><div><p style="font-weight:600; font-size:13px; margin:0;">MegaSupply Ltd</p><p style="font-size:11px; color:#dc2626; margin:0;">Scope 3: 156 tCO2e • Action needed</p></div></div><span style="padding:4px 10px; background:#fecaca; color:#991b1b; border-radius:20px; font-size:11px; font-weight:500;">Score: 28</span></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f9fafb; border-radius:8px;"><div style="display:flex; align-items:center; gap:12px;"><div style="width:32px; height:32px; background:#dbeafe; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#1e40af; font-weight:700; font-size:13px;">T</div><div><p style="font-weight:600; font-size:13px; margin:0;">TechComponents</p><p style="font-size:11px; color:#6b7280; margin:0;">Scope 3: 76 tCO2e • Pending</p></div></div><span style="padding:4px 10px; background:#e5e7eb; color:#4b5563; border-radius:20px; font-size:11px;">Awaiting</span></div>
+                        <button style="width:100%; margin-top:12px; padding:10px; border:2px dashed #d1d5db; border-radius:8px; background:transparent; color:#6b7280; font-size:13px; cursor:pointer;">+ Send Assessment</button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- END LEFT COLUMN -->
+
+        <!-- RIGHT COLUMN (25%) - AI -->
+        <div style="flex:1;">
+            
+            <!-- AI Assistant -->
+            <div style="background:linear-gradient(135deg,#1f2937,#064e3b); border-radius:12px; padding:20px; color:white; margin-bottom:16px;">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                    <div style="width:40px; height:40px; background:linear-gradient(135deg,#4ade80,#22c55e); border-radius:10px; display:flex; align-items:center; justify-content:center;"><svg style="width:20px; height:20px; color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div>
+                    <div><h3 style="font-weight:600; margin:0;">Ask CloudCFO AI</h3><p style="font-size:12px; color:#9ca3af; margin:0;">ESG & Carbon Intelligence</p></div>
+                </div>
+                <div style="position:relative; margin-bottom:16px;">
+                    <input type="text" placeholder="Ask about emissions..." style="width:100%; padding:12px 48px 12px 16px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:white; font-size:14px; box-sizing:border-box;">
+                    <button style="position:absolute; right:8px; top:50%; transform:translateY(-50%); width:32px; height:32px; background:#16a34a; border:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;"><svg style="width:16px; height:16px; color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>
+                </div>
+                <p style="font-size:11px; color:#9ca3af; margin:0 0 8px 0;">Try asking:</p>
+                <button style="width:100%; text-align:left; padding:10px 12px; background:rgba(255,255,255,0.05); border:none; border-radius:8px; color:#d1d5db; font-size:13px; cursor:pointer; margin-bottom:8px;">What's my biggest Scope 3 source?</button>
+                <button style="width:100%; text-align:left; padding:10px 12px; background:rgba(255,255,255,0.05); border:none; border-radius:8px; color:#d1d5db; font-size:13px; cursor:pointer; margin-bottom:8px;">Impact of switching to renewables?</button>
+                <button style="width:100%; text-align:left; padding:10px 12px; background:rgba(255,255,255,0.05); border:none; border-radius:8px; color:#d1d5db; font-size:13px; cursor:pointer; margin-bottom:8px;">Show travel emissions by employee</button>
+                <button style="width:100%; text-align:left; padding:10px 12px; background:rgba(255,255,255,0.05); border:none; border-radius:8px; color:#d1d5db; font-size:13px; cursor:pointer;">Which suppliers emit the most?</button>
+            </div>
+
+            <!-- Data Integrations -->
+            <div class="card" style="padding:20px; margin-bottom:16px;">
+                <h3 style="font-size:14px; font-weight:700; color:#111827; margin:0 0 12px 0;">Data Integrations</h3>
+                <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span>Persefoni</span><span style="color:#16a34a; font-size:12px;">● Connected</span></div>
+                <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; margin-bottom:8px; font-size:13px;"><span>Watershed</span><span style="color:#16a34a; font-size:12px;">● Connected</span></div>
+                <div style="display:flex; justify-content:space-between; padding:8px; background:#f9fafb; border-radius:8px; font-size:13px;"><span>Grid Intensity API</span><span style="color:#9ca3af; font-size:12px;">● Setup</span></div>
+            </div>
+
+            <!-- Auto-Discovery -->
+            <div class="card" style="padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><h3 style="font-size:14px; font-weight:700; color:#111827; margin:0;">Auto-Discovery</h3><span style="padding:2px 8px; background:#fef3c7; color:#92400e; border-radius:20px; font-size:11px;">5 new</span></div>
+                <div style="padding:12px; background:#fef3c7; border:1px solid #fde68a; border-radius:8px; margin-bottom:8px;">
+                    <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;"><span style="padding:2px 6px; background:#fde68a; color:#92400e; border-radius:4px; font-size:10px;">Travel</span><span style="font-size:11px; color:#6b7280;">Dec 22</span></div>
+                    <p style="font-size:13px; font-weight:500; margin:0 0 4px 0;">Flight: LAX → JFK</p>
+                    <div style="display:flex; justify-content:space-between;"><span style="font-size:11px; color:#6b7280;">AI: 2.4 tCO2e (92%)</span><a href="#" style="font-size:11px; color:#16a34a; text-decoration:none; font-weight:500;">Review</a></div>
+                </div>
+                <div style="padding:12px; background:#f9fafb; border-radius:8px; margin-bottom:8px;">
+                    <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;"><span style="padding:2px 6px; background:#e5e7eb; color:#4b5563; border-radius:4px; font-size:10px;">Energy</span><span style="font-size:11px; color:#6b7280;">Dec 20</span></div>
+                    <p style="font-size:13px; font-weight:500; margin:0 0 4px 0;">Utility Bill - Q4</p>
+                    <div style="display:flex; justify-content:space-between;"><span style="font-size:11px; color:#6b7280;">Auto-categorized</span><span style="font-size:11px; color:#16a34a;">✓ Added</span></div>
+                </div>
+                <div style="padding:12px; background:#fee2e2; border:1px solid #fecaca; border-radius:8px;">
+                    <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px;"><span style="font-size:11px; color:#dc2626; font-weight:500;">⚠ Missing Data</span></div>
+                    <p style="font-size:13px; color:#991b1b; margin:0 0 4px 0;">Hotel receipt needed for Nov trip</p>
+                    <a href="#" style="font-size:11px; color:#dc2626; text-decoration:none; font-weight:500;">Upload Receipt →</a>
+                </div>
+            </div>
+
+        </div><!-- END RIGHT COLUMN -->
+
+    </div><!-- END MAIN LAYOUT -->
+
+    <!-- DATA QUALITY FOOTER -->
+    <div class="card" style="padding:20px; margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:8px;"><svg style="width:20px; height:20px; color:#16a34a;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div><p style="font-size:13px; font-weight:600; color:#111827; margin:0;">Data Completeness</p><p style="font-size:11px; color:#6b7280; margin:0;">94% of required fields</p></div></div>
+                <div style="width:1px; height:32px; background:#e5e7eb;"></div>
+                <div><p style="font-size:13px; font-weight:600; color:#111827; margin:0;">Emission Factor Sources</p><p style="font-size:11px; color:#6b7280; margin:0;">EPA GHG, DEFRA 2024, GHG Protocol, IPCC AR6</p></div>
+                <div style="width:1px; height:32px; background:#e5e7eb;"></div>
+                <div><p style="font-size:13px; font-weight:600; color:#111827; margin:0;">Methodology</p><p style="font-size:11px; color:#6b7280; margin:0;">GHG Protocol Corporate Standard</p></div>
+                <div style="width:1px; height:32px; background:#e5e7eb;"></div>
+                <div style="display:flex; align-items:center; gap:8px;"><span style="padding:4px 10px; background:linear-gradient(135deg,#22c55e,#16a34a); color:white; border-radius:20px; font-size:11px;">✓ Third-Party Verified</span><span style="font-size:11px; color:#6b7280;">by EcoAudit Inc.</span></div>
+            </div>
+            <div style="text-align:right;"><p style="font-size:11px; color:#6b7280; margin:0;">Last data refresh</p><p style="font-size:13px; font-weight:600; color:#374151; margin:0;">Dec 28, 2024 • 2:30 PM</p></div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+// Scope Donut Chart
+new Chart(document.getElementById('scopeChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Scope 1', 'Scope 2', 'Scope 3'],
+        datasets: [{ data: [187, 312, 748], backgroundColor: ['#22c55e', '#3b82f6', '#d97706'], borderWidth: 0, cutout: '60%' }]
+    },
+    options: { responsive: false, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+// Monthly Trend Chart
+new Chart(document.getElementById('trendChart').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: ['J','F','M','A','M','J','J','A','S','O','N','D'],
+        datasets: [
+            { label: '2024', data: [120,115,125,110,105,95,100,98,92,90,88,85], borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.4, pointRadius: 2 },
+            { label: '2023', data: [145,140,150,135,130,125,128,122,118,115,110,108], borderColor: '#9ca3af', borderDash: [5,5], fill: false, tension: 0.4, pointRadius: 0 }
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 9 } } } } }
+});
+</script>
+
+</body>
+</html>
