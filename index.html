@@ -6,796 +6,718 @@
     <title>CloudCFO.ai — ESG & Sustainability Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf6',
-                            100: '#dcfce8',
-                            200: '#bbf7d1',
-                            300: '#86efad',
-                            400: '#4ade80',
-                            500: '#10B981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16',
-                        },
-                        gold: { 400: '#fbbf24', 500: '#FFB700', 600: '#d97706' },
-                        surface: { 50: '#F8FAFC', 100: '#F1F5F9', 200: '#E2E8F0' },
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
         *, *::before, *::after { font-family: 'Inter', system-ui, sans-serif; }
 
-        .card {
-            background: white;
-            border-radius: 14px;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
-            border-color: #bbf7d1;
+        :root {
+            --esg-green: #10B981;
+            --esg-dark: #047857;
+            --esg-surface: #F8FAFC;
         }
 
-        .noise-bg { position: relative; overflow: hidden; }
-        .noise-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-        }
-        .noise-bg > * { position: relative; z-index: 1; }
+        .card { background:white; border-radius:14px; border:1px solid #E2E8F0; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:all .4s cubic-bezier(.4,0,.2,1); }
+        .card:hover { transform:translateY(-3px); box-shadow:0 20px 40px -12px rgba(0,0,0,0.1); border-color:#bbf7d1; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .noise-bg { position:relative; overflow:hidden; }
+        .noise-bg::before { content:''; position:absolute; inset:0; opacity:.03; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; }
+        .noise-bg > * { position:relative; z-index:1; }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-            50% { box-shadow: 0 0 20px 4px rgba(16, 185, 129, 0.15); }
-        }
-        .float { animation: float 6s ease-in-out infinite; }
-        .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:#f1f5f9; }
+        ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes pulse-glow { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0)} 50%{box-shadow:0 0 20px 4px rgba(16,185,129,0.15)} }
+        @keyframes slide-in-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse-soft { 0%,100%{opacity:1} 50%{opacity:.6} }
+        @keyframes agent-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
+        @keyframes typing { 0%,80%,100%{opacity:0;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+
+        .float { animation:float 6s ease-in-out infinite; }
+        .pulse-glow { animation:pulse-glow 3s ease-in-out infinite; }
+        .slide-up { animation:slide-in-up .6s ease-out both; }
+        .pulse-soft { animation:pulse-soft 2s ease-in-out infinite; }
+        .reveal { opacity:0; transform:translateY(24px); transition:all .7s cubic-bezier(.4,0,.2,1); }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+
+        .agent-live-dot { width:8px; height:8px; border-radius:50%; background:#10B981; animation:agent-pulse 2s cubic-bezier(.4,0,.6,1) infinite; flex-shrink:0; }
+
+        /* ── AGENT BANNER (ESG = deep forest green) ── */
+        .agent-banner {
+            background: linear-gradient(135deg, #071a10 0%, #0a2a18 50%, #051510 100%);
+            border-radius:16px; border:1px solid rgba(16,185,129,0.25);
+            position:relative; overflow:hidden;
         }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .agent-banner::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse 700px 250px at 75% 50%, rgba(16,185,129,0.08), transparent);
+            pointer-events:none;
         }
 
-        .tab-btn { position: relative; }
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #10B981;
-            border-radius: 2px 2px 0 0;
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* SBTi pathway bar */
+        .sbti-track { background:#0f2a1a; border-radius:999px; height:10px; position:relative; overflow:hidden; }
+        .sbti-fill-actual { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#10B981,#34d399); border-radius:999px; }
+        .sbti-fill-target { position:absolute; top:2px; bottom:2px; width:2px; background:rgba(255,255,255,.5); border-radius:1px; }
 
-        .climatiq-logo {
-            background: linear-gradient(135deg, #4F46E5, #7C3AED);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 11px;
-        }
+        .anomaly-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:500; cursor:pointer; transition:opacity .15s; }
+        .anomaly-chip:hover { opacity:.85; }
+        .chip-danger  { background:rgba(239,68,68,.15);  color:#fca5a5; border:1px solid rgba(239,68,68,.25); }
+        .chip-warning { background:rgba(245,158,11,.15); color:#fcd34d; border:1px solid rgba(245,158,11,.25); }
+        .chip-info    { background:rgba(16,185,129,.15); color:#6ee7b7; border:1px solid rgba(16,185,129,.25); }
+
+        /* ── ANOMALY CARDS ── */
+        .anomaly-card { border-radius:14px; padding:14px 16px; border-left:3px solid transparent; transition:transform .2s, box-shadow .2s; }
+        .anomaly-card:hover { transform:translateY(-2px); box-shadow:0 8px 24px -6px rgba(0,0,0,.1); }
+        .anomaly-danger  { background:#fff5f5; border-color:#f87171; }
+        .anomaly-warning { background:#fffbeb; border-color:#fbbf24; }
+        .anomaly-info    { background:#ecfdf5; border-color:#34d399; }
+        .anomaly-label { font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; }
+        .anomaly-danger  .anomaly-label { color:#dc2626; }
+        .anomaly-warning .anomaly-label { color:#d97706; }
+        .anomaly-info    .anomaly-label { color:#059669; }
+
+        /* ── HITL ── */
+        .hitl-card { border:1px solid #E2E8F0; border-radius:14px; padding:14px 16px; background:white; display:flex; gap:14px; align-items:flex-start; transition:border-color .2s, box-shadow .2s; }
+        .hitl-card:hover { border-color:#bbf7d1; box-shadow:0 4px 16px -4px rgba(16,185,129,.1); }
+        .hitl-icon { width:34px; height:34px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+        .hitl-icon-warn { background:#fffbeb; }
+        .hitl-icon-ok { background:#ecfdf5; }
+        .hitl-icon-danger { background:#fff5f5; }
+        .hitl-btn-approve { padding:5px 12px; background:#059669; color:white; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; transition:background .15s; white-space:nowrap; }
+        .hitl-btn-approve:hover { background:#047857; }
+        .hitl-btn-dismiss { padding:5px 10px; background:transparent; color:#6b7280; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid #e5e7eb; transition:all .15s; white-space:nowrap; }
+        .hitl-btn-dismiss:hover { background:#f9fafb; }
+        .hitl-done { opacity:.45; pointer-events:none; }
+
+        /* ── COPILOT PANEL ── */
+        .copilot-panel { background:linear-gradient(160deg,#071a10 0%,#0a2a18 100%); border-radius:20px; border:1px solid rgba(16,185,129,0.2); position:relative; overflow:hidden; }
+        .copilot-panel::before { content:''; position:absolute; top:-80px; right:-60px; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%); pointer-events:none; }
+        .copilot-message { padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); font-size:13px; line-height:1.6; color:#d1fae5; }
+        .copilot-anomaly-item { padding:10px 12px; border-radius:10px; font-size:12px; line-height:1.5; }
+        .copilot-anomaly-item.d { background:rgba(239,68,68,.12); color:#fca5a5; }
+        .copilot-anomaly-item.w { background:rgba(245,158,11,.12); color:#fcd34d; }
+        .copilot-anomaly-item.g { background:rgba(16,185,129,.12); color:#6ee7b7; }
+        .copilot-anomaly-label { font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.7; display:block; margin-bottom:2px; }
+        .draft-box { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px 14px; }
+        .copilot-input { width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px 44px 10px 14px; color:#e5e7eb; font-size:13px; outline:none; transition:border-color .2s; }
+        .copilot-input::placeholder { color:rgba(255,255,255,.35); }
+        .copilot-input:focus { border-color:rgba(16,185,129,0.5); }
+        .copilot-send { position:absolute; right:8px; top:50%; transform:translateY(-50%); width:30px; height:30px; background:#059669; border-radius:8px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+        .copilot-send:hover { background:#047857; }
+        .memory-pill { padding:3px 9px; border-radius:999px; font-size:11px; font-weight:500; background:rgba(255,255,255,0.08); color:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,0.1); }
+        .typing-dot { display:inline-block; width:4px; height:4px; border-radius:50%; background:#10B981; animation:typing 1.4s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay:.2s; }
+        .typing-dot:nth-child(3) { animation-delay:.4s; }
+
+        .tab-btn { position:relative; }
+        .tab-btn.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:#10B981; border-radius:2px 2px 0 0; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .climatiq-logo { background:linear-gradient(135deg,#4F46E5,#7C3AED); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; }
     </style>
 </head>
 <body class="bg-[#F8FAFC] text-gray-900 antialiased min-h-screen">
 
-<!-- ═══════════════════════════════════════════════════ -->
-<!-- HEADER / TOP NAVIGATION                            -->
-<!-- ═══════════════════════════════════════════════════ -->
+<!-- HEADER -->
 <header class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 transition-shadow" id="header">
     <div class="max-w-[1400px] mx-auto px-5 py-3 flex items-center justify-between">
         <div class="flex items-center gap-8">
-            <!-- NEW TEXT-BASED LOGO -->
             <a href="#" class="flex items-center select-none">
                 <span class="text-[22px] font-extrabold tracking-tight text-black">CloudCFO</span><span class="text-[22px] font-extrabold tracking-tight text-[#2563EB]">.ai</span>
             </a>
             <nav class="flex gap-1">
-                <a href="#" class="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-lg transition-all duration-200">Intelligence</a>
-                <a href="#" class="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-lg transition-all duration-200">Accounting</a>
-                <a href="#" class="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-lg transition-all duration-200">Banking & Payments</a>
-                <a href="#" class="px-3 py-2 text-sm font-medium text-brand-500 relative">ESG<span class="absolute bottom-0 left-3 right-3 h-[2px] bg-brand-500 rounded-t"></span></a>
+                <a href="#" class="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-lg transition-all">Intelligence</a>
+                <a href="#" class="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-lg transition-all">Accounting</a>
+                <a href="#" class="px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-lg transition-all">Banking & Payments</a>
+                <a href="#" class="px-3 py-2 text-sm font-medium text-[#10B981] relative">ESG<span class="absolute bottom-0 left-3 right-3 h-[2px] bg-[#10B981] rounded-t"></span></a>
             </nav>
         </div>
         <div class="flex items-center gap-3">
-            <span class="text-xs text-gray-400 hidden lg:inline">Waiting for your first document...</span>
+            <!-- Agent status pill -->
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium border border-emerald-200">
+                <div class="agent-live-dot" style="width:6px;height:6px;"></div>
+                Agent · SBTi pathway active
+            </div>
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">
+                <svg class="w-3.5 h-3.5 pulse-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span class="font-medium">3 HITL items</span>
+            </div>
             <button class="w-8 h-8 rounded-lg hover:bg-gray-50 flex items-center justify-center text-gray-400 transition">
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.066z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </button>
-            <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-semibold text-xs">KE</div>
+            <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-semibold text-xs">KE</div>
         </div>
     </div>
 </header>
 
 <main class="max-w-[1400px] mx-auto px-5 py-6">
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- PAGE TITLE & ACTIONS                           -->
-    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAGE TITLE & ACTIONS -->
     <div class="flex items-center justify-between mb-6">
         <div>
             <nav class="flex items-center gap-2 text-sm mb-1.5">
-                <a href="#" class="text-gray-400 hover:text-brand-500 transition">Dashboard</a>
+                <a href="#" class="text-gray-400 hover:text-[#10B981] transition">Dashboard</a>
                 <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 <span class="text-gray-700 font-medium">ESG & Sustainability</span>
             </nav>
             <h1 class="text-2xl font-bold text-gray-900">ESG & Sustainability Dashboard</h1>
         </div>
         <div class="flex gap-2">
-            <select class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition cursor-pointer"><option>Quarter</option><option>Annual</option></select>
-            <select class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition cursor-pointer"><option>GRI Standards</option><option>SASB</option><option>TCFD</option></select>
-            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-gray-300 hover:bg-gray-50 transition-all duration-200">Export Report</button>
-            <button class="px-4 py-2 bg-brand-800 text-white rounded-lg text-sm font-semibold hover:bg-brand-900 shadow-sm transition-all duration-200">Generate ESG Report</button>
+            <select class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition cursor-pointer"><option>Quarter</option><option>Annual</option></select>
+            <select class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] transition cursor-pointer"><option>GRI Standards</option><option>SASB</option><option>TCFD</option></select>
+            <button class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-gray-300 hover:bg-gray-50 transition-all">Export Report</button>
+            <button class="px-4 py-2 bg-[#047857] text-white rounded-lg text-sm font-semibold hover:bg-[#065f46] shadow-sm transition-all">Generate ESG Report</button>
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- KPI CARDS ROW                                  -->
-    <!-- ═══════════════════════════════════════════════ -->
+    <!-- ═══ AGENT INTELLIGENCE BANNER ═══ -->
+    <div class="agent-banner p-5 mb-6 slide-up">
+        <div class="relative z-10 flex items-start gap-6">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2.5 mb-3">
+                    <div class="agent-live-dot"></div>
+                    <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">CloudCFO Agent · Acme Corp · ESG — SBTi Pathway Monitor</span>
+                    <span class="text-xs text-gray-500 ml-auto">Today, 09:14 — updated 4 min ago</span>
+                </div>
+                <p class="text-sm text-gray-200 leading-relaxed max-w-3xl">
+                    You're <span class="font-semibold text-amber-300">4% over your 2025 SBTi pathway</span> at 55.2 tCO₂e YTD against a 53.0t target. The Geneva conference alone added <span class="font-semibold text-white">3.1t</span> — one transatlantic flight is equivalent to 4 months of your office energy budget. Good news: cloud emissions dropped <span class="font-semibold text-emerald-300">18%</span> after migrating three workloads to GCP's low-carbon regions in October. At this rate, you need to offset ~6t to close the annual gap. Gold Standard credits are at $18/t — I've queued a purchase for your approval. Three CSRD supplier responses are still outstanding with 19 days to the Jan 31 deadline.
+                </p>
+
+                <!-- SBTi pathway visualiser -->
+                <div class="mt-4 mb-3">
+                    <div class="flex items-center justify-between text-xs text-gray-400 mb-1.5">
+                        <span>2025 SBTi pathway progress (tCO₂e)</span>
+                        <span class="text-amber-400 font-semibold">55.2t actual vs 53.0t target — +4.2%</span>
+                    </div>
+                    <div class="sbti-track">
+                        <div class="sbti-fill-actual" style="width:69%"></div><!-- 55.2/80 total budget -->
+                        <div class="sbti-fill-target" style="left:66%"></div><!-- 53.0/80 -->
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-gray-500 mt-1">
+                        <span>0t</span>
+                        <span class="text-amber-400">← Target: 53.0t</span>
+                        <span class="text-gray-400">Actual: 55.2t →</span>
+                        <span>80t (budget cap)</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <span class="anomaly-chip chip-danger"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M12 4a8 8 0 100 16A8 8 0 0012 4z"/></svg>Air travel Scope 3 at 82% of annual cap</span>
+                    <span class="anomaly-chip chip-warning"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>3 CSRD suppliers — 19 days to deadline</span>
+                    <span class="anomaly-chip chip-info"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>6t offset at $108 closes annual gap</span>
+                </div>
+            </div>
+            <!-- Memory pills -->
+            <div class="hidden lg:flex flex-col gap-2 flex-shrink-0 min-w-[190px]">
+                <div class="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Agent memory</div>
+                <div class="flex flex-wrap gap-1.5">
+                    <span class="memory-pill">SBTi 2025 pathway</span>
+                    <span class="memory-pill">Supplier registry</span>
+                    <span class="memory-pill">CSRD deadline: Jan 31</span>
+                    <span class="memory-pill">GCP migration: Oct 2025</span>
+                    <span class="memory-pill">Geneva conf: 3.1t</span>
+                </div>
+                <div class="mt-2 pt-2 border-t border-white/10">
+                    <p class="text-xs text-gray-400">ESG Passport: Nov draft ready</p>
+                    <p class="text-xs text-emerald-400 font-medium mt-0.5">Offset window: open ✓</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI CARDS -->
     <div class="grid grid-cols-4 gap-4 mb-6">
-        <!-- Total CO2 -->
-        <div class="card p-5 border-l-4 border-brand-500">
-            <p class="text-sm text-gray-500 font-medium">Total CO2 Emissions</p>
+        <div class="card p-5 border-l-4 border-[#10B981]">
+            <p class="text-sm text-gray-500 font-medium">Total CO₂ Emissions</p>
             <div class="flex items-baseline gap-2 mt-1.5">
                 <p class="text-[28px] font-bold text-gray-900 leading-none">1,247</p>
-                <span class="text-sm font-medium text-gray-500">tCO2e</span>
+                <span class="text-sm font-medium text-gray-500">tCO₂e</span>
             </div>
             <div class="flex items-center gap-1.5 mt-2">
-                <span class="text-brand-500 text-sm font-semibold flex items-center gap-0.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                    -23%
-                </span>
+                <span class="text-[#10B981] text-sm font-semibold flex items-center gap-0.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>-23%</span>
                 <span class="text-xs text-gray-400">vs 2023 baseline</span>
             </div>
         </div>
-        <!-- Carbon Intensity -->
         <div class="card p-5 border-l-4 border-blue-500">
             <p class="text-sm text-gray-500 font-medium">Carbon Intensity</p>
             <div class="flex items-baseline gap-2 mt-1.5">
                 <p class="text-[28px] font-bold text-gray-900 leading-none">14.7</p>
-                <span class="text-sm font-medium text-gray-500">tCO2e/$M</span>
+                <span class="text-sm font-medium text-gray-500">tCO₂e/$M</span>
             </div>
             <div class="flex items-center gap-1.5 mt-2">
-                <span class="bg-brand-100 text-brand-700 text-xs px-2 py-0.5 rounded-full font-medium">+20% industry avg</span>
+                <span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium">+20% vs industry avg</span>
             </div>
         </div>
-        <!-- ESG Score -->
-        <div class="card p-5 border-l-4 border-[#8B5CF6]">
+        <div class="card p-5 border-l-4 border-purple-500">
             <p class="text-sm text-gray-500 font-medium">ESG Score</p>
             <div class="flex items-baseline gap-2 mt-1.5">
                 <p class="text-[28px] font-bold text-gray-900 leading-none">78</p>
                 <span class="text-sm font-medium text-gray-500">/100</span>
             </div>
             <div class="flex items-center gap-2 mt-2">
-                <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full font-medium">33.2% Insight</span>
-                <span class="text-xs text-brand-500 font-medium">+23% vs last quarter</span>
+                <span class="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full font-medium">B tier</span>
+                <span class="text-xs text-[#10B981] font-medium">+23% vs last quarter</span>
             </div>
         </div>
-        <!-- Offset Progress -->
         <div class="card p-5 border-l-4 border-amber-500">
             <p class="text-sm text-gray-500 font-medium">Offset Progress</p>
             <div class="flex items-baseline gap-2 mt-1.5">
                 <p class="text-[28px] font-bold text-gray-900 leading-none">67%</p>
-                <span class="bg-brand-100 text-brand-700 text-xs px-2 py-0.5 rounded-full font-medium ml-1">On Track</span>
+                <span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium ml-1">On Track</span>
             </div>
-            <div class="w-full bg-surface-200 rounded-full h-2 mt-3">
-                <div class="bg-gradient-to-r from-brand-400 to-brand-500 h-2 rounded-full transition-all duration-700" style="width:67%"></div>
-            </div>
-            <p class="text-xs text-gray-400 mt-1.5">836 tCO2e offset • 411 credits remaining</p>
+            <div class="w-full bg-gray-100 rounded-full h-2 mt-3"><div class="bg-gradient-to-r from-[#10B981] to-[#34d399] h-2 rounded-full" style="width:67%"></div></div>
+            <p class="text-xs text-gray-400 mt-1.5">836 tCO₂e offset • 411 credits remaining</p>
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- MAIN GRID: LEFT (9) + RIGHT (3)                -->
-    <!-- ═══════════════════════════════════════════════ -->
+    <!-- MAIN GRID 9 + 3 -->
     <div class="grid grid-cols-12 gap-5">
 
-        <!-- ──────────── LEFT COLUMN ──────────── -->
+        <!-- LEFT COLUMN -->
         <div class="col-span-9 space-y-5">
 
-            <!-- ═══ SECTION A: CARBON ACCOUNTING ═══ -->
+            <!-- CARBON ACCOUNTING -->
             <div class="card reveal">
-                <div class="p-5 border-b border-surface-200 flex items-center justify-between">
-                    <div>
-                        <h2 class="font-bold text-gray-900 text-[17px]">Carbon Accounting</h2>
-                        <p class="text-sm text-gray-500">Emission tracking & analysis</p>
-                    </div>
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <div><h2 class="font-bold text-gray-900 text-[17px]">Carbon Accounting</h2><p class="text-sm text-gray-500">Emission tracking & analysis</p></div>
                     <div class="flex gap-2">
-                        <span class="px-2.5 py-1 bg-brand-500 text-white text-xs rounded-full font-medium">92% Verified</span>
+                        <span class="px-2.5 py-1 bg-[#10B981] text-white text-xs rounded-full font-medium">92% Verified</span>
                         <span class="px-2.5 py-1 bg-red-500 text-white text-xs rounded-full font-medium">8% Estimated</span>
                     </div>
                 </div>
-                <!-- TABS -->
-                <div class="border-b border-surface-200 px-5">
+                <div class="border-b border-gray-100 px-5">
                     <div class="flex gap-1">
-                        <button class="tab-btn active px-3 py-2.5 text-sm font-medium text-brand-500" onclick="switchCarbonTab(this, 'carbon-overview')">Emissions Overview</button>
-                        <button class="tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition" onclick="switchCarbonTab(this, 'carbon-byproduct')">By-product</button>
-                        <button class="tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition" onclick="switchCarbonTab(this, 'carbon-autodiscovery')">Auto-discovery</button>
-                        <button class="tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition" onclick="switchCarbonTab(this, 'carbon-calculator')">Calculator tools</button>
+                        <button class="tab-btn active px-3 py-2.5 text-sm font-medium text-[#10B981]" onclick="switchCarbonTab(this,'carbon-overview')">Emissions Overview</button>
+                        <button class="tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition" onclick="switchCarbonTab(this,'carbon-byproduct')">By-product</button>
+                        <button class="tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition" onclick="switchCarbonTab(this,'carbon-autodiscovery')">Auto-discovery</button>
+                        <button class="tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition" onclick="switchCarbonTab(this,'carbon-calculator')">Calculator tools</button>
                     </div>
                 </div>
-                <!-- TAB: Emissions Overview -->
                 <div id="carbon-overview" class="tab-content active p-5 grid grid-cols-3 gap-4">
-                    <!-- Donut Chart -->
-                    <div class="bg-surface-50 rounded-xl p-5 border border-surface-200">
+                    <div class="bg-[#F8FAFC] rounded-xl p-5 border border-gray-100">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Emissions by Scope</h3>
                         <div class="flex justify-center"><canvas id="scopeChart" width="150" height="150"></canvas></div>
                         <div class="mt-3 space-y-1.5 text-sm">
-                            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-brand-500 rounded-full"></span>Scope 1</span><span class="font-semibold">187 tCO2e</span></div>
-                            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-blue-500 rounded-full"></span>Scope 2</span><span class="font-semibold">312 tCO2e</span></div>
-                            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>Scope 3</span><span class="font-semibold">748 tCO2e</span></div>
+                            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-[#10B981] rounded-full"></span>Scope 1</span><span class="font-semibold">187 tCO₂e</span></div>
+                            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-blue-500 rounded-full"></span>Scope 2</span><span class="font-semibold">312 tCO₂e</span></div>
+                            <div class="flex justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>Scope 3</span><span class="font-semibold">748 tCO₂e</span></div>
                         </div>
                     </div>
-                    <!-- Monthly Trend -->
-                    <div class="bg-surface-50 rounded-xl p-5 border border-surface-200">
+                    <div class="bg-[#F8FAFC] rounded-xl p-5 border border-gray-100">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Monthly Trend (2024 vs 2023)</h3>
-                        <div style="position:relative; height:220px;"><canvas id="trendChart"></canvas></div>
+                        <div style="position:relative;height:220px;"><canvas id="trendChart"></canvas></div>
                     </div>
-                    <!-- By Category -->
-                    <div class="bg-surface-50 rounded-xl p-5 border border-surface-200">
+                    <div class="bg-[#F8FAFC] rounded-xl p-5 border border-gray-100">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">By Category</h3>
                         <div class="space-y-3">
-                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Energy & Utilities</span><span class="font-semibold">412 tCO2e</span></div><div class="w-full bg-surface-200 rounded-full h-[6px]"><div class="bg-brand-500 h-[6px] rounded-full" style="width:33%"></div></div></div>
-                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Business Travel</span><span class="font-semibold">298 tCO2e</span></div><div class="w-full bg-surface-200 rounded-full h-[6px]"><div class="bg-blue-500 h-[6px] rounded-full" style="width:24%"></div></div></div>
-                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Supply Chain</span><span class="font-semibold">287 tCO2e</span></div><div class="w-full bg-surface-200 rounded-full h-[6px]"><div class="bg-amber-500 h-[6px] rounded-full" style="width:23%"></div></div></div>
-                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Employee Commuting</span><span class="font-semibold">156 tCO2e</span></div><div class="w-full bg-surface-200 rounded-full h-[6px]"><div class="bg-purple-500 h-[6px] rounded-full" style="width:12.5%"></div></div></div>
-                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Data Centers</span><span class="font-semibold">94 tCO2e</span></div><div class="w-full bg-surface-200 rounded-full h-[6px]"><div class="bg-teal-500 h-[6px] rounded-full" style="width:7.5%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Energy & Utilities</span><span class="font-semibold">412 tCO₂e</span></div><div class="w-full bg-gray-100 rounded-full h-[6px]"><div class="bg-[#10B981] h-[6px] rounded-full" style="width:33%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600 flex items-center gap-1.5">Business Travel <span class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">⚠ at 82% cap</span></span><span class="font-semibold text-red-600">298 tCO₂e</span></div><div class="w-full bg-gray-100 rounded-full h-[6px]"><div class="h-[6px] rounded-full" style="width:24%;background:#ef4444"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Supply Chain</span><span class="font-semibold">287 tCO₂e</span></div><div class="w-full bg-gray-100 rounded-full h-[6px]"><div class="bg-amber-500 h-[6px] rounded-full" style="width:23%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600">Employee Commuting</span><span class="font-semibold">156 tCO₂e</span></div><div class="w-full bg-gray-100 rounded-full h-[6px]"><div class="bg-purple-500 h-[6px] rounded-full" style="width:12.5%"></div></div></div>
+                            <div><div class="flex justify-between text-sm mb-1"><span class="text-gray-600 flex items-center gap-1.5">Data Centers <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">↓ 18% agent win</span></span><span class="font-semibold text-emerald-600">94 tCO₂e</span></div><div class="w-full bg-gray-100 rounded-full h-[6px]"><div class="bg-teal-500 h-[6px] rounded-full" style="width:7.5%"></div></div></div>
                         </div>
                     </div>
                 </div>
-                <!-- TAB: By-product (placeholder) -->
-                <div id="carbon-byproduct" class="tab-content p-5">
-                    <div class="text-center py-10">
-                        <p class="text-gray-400 text-sm">Product-level emission breakdown coming soon</p>
+                <div id="carbon-byproduct" class="tab-content p-5"><div class="text-center py-10"><p class="text-gray-400 text-sm">Product-level emission breakdown coming soon</p></div></div>
+                <div id="carbon-autodiscovery" class="tab-content p-5"><div class="text-center py-10"><p class="text-gray-400 text-sm">See the Auto-discovery panel in the sidebar →</p></div></div>
+                <div id="carbon-calculator" class="tab-content p-5"><div class="text-center py-10"><p class="text-gray-400 text-sm">Emission calculation tools coming soon</p></div></div>
+            </div>
+
+            <!-- ═══ ANOMALIES SURFACED ═══ -->
+            <div class="card reveal">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-gray-900 text-[17px]">Anomalies surfaced by agent</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Cross-referenced against your SBTi pathway, supplier registry, and CSRD obligations</p>
+                        </div>
                     </div>
+                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">3 require action</span>
                 </div>
-                <!-- TAB: Auto-discovery (placeholder) -->
-                <div id="carbon-autodiscovery" class="tab-content p-5">
-                    <div class="text-center py-10">
-                        <p class="text-gray-400 text-sm">See the Auto-discovery panel in the sidebar →</p>
+                <div class="p-5 grid grid-cols-3 gap-4">
+                    <div class="anomaly-card anomaly-danger">
+                        <div class="anomaly-label">Scope 3 — cap breach</div>
+                        <p class="text-sm font-semibold text-gray-900 mb-1">Air travel at 82% of annual Scope 3 budget</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">298 tCO₂e from business travel — 82% of your full-year Scope 3 cap with 6 weeks remaining. One more long-haul flight exceeds the annual target. Agent recommends a travel freeze pending Q4 close.</p>
+                        <div class="flex items-center gap-2 mt-3">
+                            <button class="hitl-btn-approve text-xs py-1" onclick="resolveAnomaly(this)" style="background:#dc2626;">Issue travel advisory</button>
+                            <button class="hitl-btn-dismiss text-xs py-1">Allow exceptions</button>
+                        </div>
                     </div>
-                </div>
-                <!-- TAB: Calculator (placeholder) -->
-                <div id="carbon-calculator" class="tab-content p-5">
-                    <div class="text-center py-10">
-                        <p class="text-gray-400 text-sm">Emission calculation tools coming soon</p>
+                    <div class="anomaly-card anomaly-warning">
+                        <div class="anomaly-label">CSRD gap — deadline risk</div>
+                        <p class="text-sm font-semibold text-gray-900 mb-1">3 suppliers non-responsive — 19 days to Jan 31</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">GlobalParts Inc., MegaSupply Ltd., and TechComponents have not submitted emissions data requested 45 days ago. CSRD reporting requires supplier-level Scope 3 data. Agent has drafted a second formal request.</p>
+                        <div class="flex items-center gap-2 mt-3">
+                            <button class="hitl-btn-approve text-xs py-1" onclick="resolveAnomaly(this)" style="background:#d97706;">Send 2nd request now</button>
+                            <button class="hitl-btn-dismiss text-xs py-1">Escalate to legal</button>
+                        </div>
+                    </div>
+                    <div class="anomaly-card anomaly-info">
+                        <div class="anomaly-label">Offset opportunity</div>
+                        <p class="text-sm font-semibold text-gray-900 mb-1">6t gap closable at $108 — Gold Standard</p>
+                        <p class="text-xs text-gray-600 leading-relaxed">Gold Standard offset credits are at $18/tCO₂e. Purchasing 6t now closes your 2025 annual gap before Dec 31. Agent has identified three vetted reforestation projects. Window closes mid-January.</p>
+                        <div class="flex items-center gap-2 mt-3">
+                            <button class="hitl-btn-approve text-xs py-1" onclick="resolveAnomaly(this)">Approve $108 purchase</button>
+                            <button class="hitl-btn-dismiss text-xs py-1">Review projects first</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══ SECTION B: E/S/G SCORES ═══ -->
+            <!-- ═══ HITL QUEUE ═══ -->
             <div class="card reveal">
-                <div class="p-5 border-b border-surface-200 flex items-center justify-between cursor-pointer" onclick="toggleScores()">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-gray-900 text-[17px]">HITL — decisions needed</h2>
+                            <p class="text-xs text-gray-500 mt-0.5">ESG actions the agent cannot execute without your explicit sign-off</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full pulse-soft">3 pending</span>
+                </div>
+                <div class="p-5 space-y-3" id="hitlQueue">
+                    <!-- HITL 1 -->
+                    <div class="hitl-card" id="hitl-1">
+                        <div class="hitl-icon hitl-icon-ok"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Approve purchase of 6 tCO₂e Gold Standard offsets — $108 total ($18/t)</p>
+                                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">This closes your 2025 SBTi annual gap before Dec 31 and satisfies the offset clause in your sustainability policy. Three vetted reforestation projects available: Amazon Basin (Brazil), Boreal Forest (Canada), and Mangrove Restoration (Philippines). Agent recommends splitting across all three for portfolio resilience.</p>
+                                </div>
+                                <div class="flex flex-col gap-1.5 flex-shrink-0">
+                                    <button class="hitl-btn-approve" onclick="resolveHITL('hitl-1','Offset purchase approved — 6 tCO₂e Gold Standard')">Approve purchase</button>
+                                    <button class="hitl-btn-dismiss" onclick="dismissHITL('hitl-1')">Review projects first</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- HITL 2 -->
+                    <div class="hitl-card" id="hitl-2">
+                        <div class="hitl-icon hitl-icon-warn"><svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Send second CSRD data request to GlobalParts, MegaSupply, and TechComponents</p>
+                                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">First request sent 45 days ago — no response. Jan 31 CSRD deadline is 19 days away. Agent has drafted a formal second notice citing the regulatory obligation and setting a 10-day response deadline. Approve to send via email with read receipts and CC to procurement.</p>
+                                </div>
+                                <div class="flex flex-col gap-1.5 flex-shrink-0">
+                                    <button class="hitl-btn-approve" onclick="resolveHITL('hitl-2','CSRD second requests sent to 3 suppliers')">Send notices</button>
+                                    <button class="hitl-btn-approve" onclick="resolveHITL('hitl-2','Escalated to legal for CSRD compliance')" style="background:#d97706;">Escalate to legal</button>
+                                    <button class="hitl-btn-dismiss" onclick="dismissHITL('hitl-2')">Hold 5 more days</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- HITL 3 -->
+                    <div class="hitl-card" id="hitl-3">
+                        <div class="hitl-icon hitl-icon-danger"><svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Issue Q4 travel advisory — no more long-haul flights before Dec 31</p>
+                                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">Air travel is at 82% of the annual Scope 3 travel budget with 6 weeks left. One round-trip transatlantic flight (~2.5t) would breach the cap. Agent has drafted a company-wide advisory memo. Approve to send to all team leads via email, or override if a business-critical trip is already planned.</p>
+                                </div>
+                                <div class="flex flex-col gap-1.5 flex-shrink-0">
+                                    <button class="hitl-btn-approve" onclick="resolveHITL('hitl-3','Q4 travel advisory issued to all team leads')">Issue advisory</button>
+                                    <button class="hitl-btn-dismiss" onclick="dismissHITL('hitl-3')">Allow exceptions</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCORES -->
+            <div class="card reveal">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between cursor-pointer" onclick="toggleScores()">
                     <h2 class="font-bold text-gray-900 text-[17px]">Scores</h2>
                     <svg id="scores-chevron" class="w-5 h-5 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
                 <div id="scores-body">
-                    <!-- Score Tabs -->
-                    <div class="border-b border-surface-200 px-5">
+                    <div class="border-b border-gray-100 px-5">
                         <div class="flex gap-1">
-                            <button class="score-tab-btn active px-3 py-2.5 text-sm font-medium text-brand-500 relative" onclick="switchScoreTab(this, 'score-env')">Environmental<span class="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t score-indicator"></span></button>
-                            <button class="score-tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition relative" onclick="switchScoreTab(this, 'score-social')">Social</button>
-                            <button class="score-tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition relative" onclick="switchScoreTab(this, 'score-gov')">Governance</button>
+                            <button class="score-tab-btn active px-3 py-2.5 text-sm font-medium text-[#10B981] relative" onclick="switchScoreTab(this,'score-env')">Environmental<span class="absolute bottom-0 left-0 right-0 h-[2px] bg-[#10B981] rounded-t score-indicator"></span></button>
+                            <button class="score-tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition relative" onclick="switchScoreTab(this,'score-social')">Social</button>
+                            <button class="score-tab-btn px-3 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition relative" onclick="switchScoreTab(this,'score-gov')">Governance</button>
                         </div>
                     </div>
-                    <!-- Environmental -->
                     <div id="score-env" class="score-tab-content active p-5">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div>
-                            <div><span class="font-bold text-gray-900">Environmental</span><span class="text-xs text-gray-500 ml-2">Score: 82/100</span></div>
-                        </div>
+                        <div class="flex items-center gap-2 mb-4"><div class="w-8 h-8 bg-[#10B981] rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div><div><span class="font-bold text-gray-900">Environmental</span><span class="text-xs text-gray-500 ml-2">Score: 82/100</span></div></div>
                         <div class="grid grid-cols-3 gap-3">
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Energy Consumption</span><span class="font-semibold">847,320 kWh</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Renewable Energy</span><span class="font-semibold text-brand-500">42%</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Water Usage</span><span class="font-semibold">12,450 m³</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Recycling Rate</span><span class="font-semibold text-brand-500">78%</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Landfill Diversion</span><span class="font-semibold">92%</span></div>
-                            <div class="flex justify-between items-center p-3 bg-brand-50 border border-brand-200 rounded-xl text-sm"><span class="text-brand-700 font-medium">ISO 14001</span><span class="bg-brand-500 text-white text-xs px-2.5 py-0.5 rounded-full font-medium">Certified</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Energy Consumption</span><span class="font-semibold">847,320 kWh</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Renewable Energy</span><span class="font-semibold text-[#10B981]">42%</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Water Usage</span><span class="font-semibold">12,450 m³</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Recycling Rate</span><span class="font-semibold text-[#10B981]">78%</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Landfill Diversion</span><span class="font-semibold">92%</span></div>
+                            <div class="flex justify-between items-center p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm"><span class="text-emerald-700 font-medium">ISO 14001</span><span class="bg-[#10B981] text-white text-xs px-2.5 py-0.5 rounded-full font-medium">Certified</span></div>
                         </div>
                     </div>
-                    <!-- Social -->
                     <div id="score-social" class="score-tab-content p-5" style="display:none">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
-                            <div><span class="font-bold text-gray-900">Social</span><span class="text-xs text-gray-500 ml-2">Score: 75/100</span></div>
-                        </div>
+                        <div class="flex items-center gap-2 mb-4"><div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div><span class="font-bold text-gray-900">Social</span><span class="text-xs text-gray-500 ml-2">Score: 75/100</span></div></div>
                         <div class="grid grid-cols-3 gap-3">
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Workforce Diversity</span><span class="font-semibold">43% F / 57% M</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Employee Satisfaction</span><span class="font-semibold text-blue-600">4.2/5.0</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Training Hours/Employee</span><span class="font-semibold">24 hrs</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Safety Incidents (YTD)</span><span class="font-semibold text-brand-500">0</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Community Investment</span><span class="font-semibold">$125,000</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Supply Chain Compliance</span><span class="font-semibold text-blue-600">94%</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Workforce Diversity</span><span class="font-semibold">43% F / 57% M</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Employee Satisfaction</span><span class="font-semibold text-blue-600">4.2/5.0</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Training hrs/Employee</span><span class="font-semibold">24 hrs</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Safety Incidents YTD</span><span class="font-semibold text-[#10B981]">0</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Community Investment</span><span class="font-semibold">$125,000</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Supply Chain Compliance</span><span class="font-semibold text-blue-600">94%</span></div>
                         </div>
                     </div>
-                    <!-- Governance -->
                     <div id="score-gov" class="score-tab-content p-5" style="display:none">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
-                            <div><span class="font-bold text-gray-900">Governance</span><span class="text-xs text-gray-500 ml-2">Score: 77/100</span></div>
-                        </div>
+                        <div class="flex items-center gap-2 mb-4"><div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><div><span class="font-bold text-gray-900">Governance</span><span class="text-xs text-gray-500 ml-2">Score: 77/100</span></div></div>
                         <div class="grid grid-cols-3 gap-3">
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Board Diversity</span><span class="font-semibold">40% diverse</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Ethics Training</span><span class="font-semibold text-brand-500">98%</span></div>
-                            <div class="flex justify-between items-center p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">GDPR Compliance</span><span class="bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full">Compliant</span></div>
-                            <div class="flex justify-between items-center p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">CCPA Compliance</span><span class="bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full">Compliant</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">Whistleblower Reports</span><span class="font-semibold">2 (resolved)</span></div>
-                            <div class="flex justify-between p-3 bg-surface-50 rounded-xl text-sm"><span class="text-gray-600">CEO Pay Ratio</span><span class="font-semibold">24:1</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Board Diversity</span><span class="font-semibold">40% diverse</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Ethics Training</span><span class="font-semibold text-[#10B981]">98%</span></div>
+                            <div class="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">GDPR Compliance</span><span class="bg-[#10B981] text-white text-xs px-2 py-0.5 rounded-full">Compliant</span></div>
+                            <div class="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">CCPA Compliance</span><span class="bg-[#10B981] text-white text-xs px-2 py-0.5 rounded-full">Compliant</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">Whistleblower Reports</span><span class="font-semibold">2 (resolved)</span></div>
+                            <div class="flex justify-between p-3 bg-[#F8FAFC] rounded-xl text-sm"><span class="text-gray-600">CEO Pay Ratio</span><span class="font-semibold">24:1</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══ SECTION C & D: GOALS + OFFSETTING ═══ -->
+            <!-- GOALS + OFFSETTING -->
             <div class="grid grid-cols-2 gap-4">
-                <!-- Goals & Targets -->
                 <div class="card reveal">
-                    <div class="p-5 border-b border-surface-200 flex justify-between items-center">
+                    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
                         <h2 class="font-bold text-gray-900 text-[17px]">Goals & Targets Tracker</h2>
-                        <button class="text-sm text-brand-500 font-semibold hover:text-brand-700 transition">Edit Goals</button>
+                        <button class="text-sm text-[#10B981] font-semibold hover:text-[#047857] transition">Edit Goals</button>
                     </div>
                     <div class="p-5">
-                        <!-- Net Zero Roadmap -->
                         <div class="mb-5">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-sm font-semibold text-gray-700">Net Zero Roadmap</span>
-                                <span class="text-sm text-brand-500 font-medium">Target: 2040</span>
-                            </div>
-                            <div class="w-full bg-surface-200 rounded-full h-3.5 relative">
-                                <div class="bg-gradient-to-r from-brand-400 to-brand-500 h-3.5 rounded-full" style="width:35%"></div>
-                                <div class="absolute top-0 h-3.5 flex items-center" style="left:35%">
-                                    <div class="w-5 h-5 bg-brand-500 rounded-full border-2 border-white shadow-md -ml-2.5"></div>
-                                </div>
-                            </div>
-                            <div class="flex justify-between mt-1.5 text-xs text-gray-400">
-                                <span>2025</span><span>2030</span><span>2040</span>
-                            </div>
+                            <div class="flex justify-between mb-2"><span class="text-sm font-semibold text-gray-700">Net Zero Roadmap</span><span class="text-sm text-[#10B981] font-medium">Target: 2040</span></div>
+                            <div class="w-full bg-gray-100 rounded-full h-3.5 relative"><div class="bg-gradient-to-r from-[#10B981] to-[#34d399] h-3.5 rounded-full" style="width:35%"></div><div class="absolute top-0 h-3.5 flex items-center" style="left:35%"><div class="w-5 h-5 bg-[#10B981] rounded-full border-2 border-white shadow-md -ml-2.5"></div></div></div>
+                            <div class="flex justify-between mt-1.5 text-xs text-gray-400"><span>2025</span><span>2030</span><span>2040</span></div>
                         </div>
-                        <!-- Milestones -->
                         <div class="space-y-3">
-                            <div class="p-3 bg-brand-50 border border-brand-200 rounded-xl">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 bg-brand-500 rounded-full flex items-center justify-center text-white text-xs">✓</span>
-                                        <span class="font-medium text-brand-800 text-sm">Short-term (2025)</span>
-                                    </div>
-                                    <span class="bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">On Track</span>
-                                </div>
-                                <p class="text-xs text-brand-700 mt-2">25% reduction Scope 1 & 2 • <strong>92% complete</strong></p>
-                            </div>
-                            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold">2</span>
-                                        <span class="font-medium text-amber-800 text-sm">Medium-term (2030)</span>
-                                    </div>
-                                    <span class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">In Progress</span>
-                                </div>
-                                <p class="text-xs text-amber-700 mt-2">50% reduction all scopes (SBTi) • <strong>38% complete</strong></p>
-                            </div>
-                            <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold">3</span>
-                                        <span class="font-medium text-gray-700 text-sm">Long-term (2040)</span>
-                                    </div>
-                                    <span class="bg-gray-300 text-gray-600 text-xs px-2 py-0.5 rounded-full font-medium">Planned</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-2">Net Zero emissions • Science-based target validated</p>
-                            </div>
+                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl"><div class="flex justify-between items-center"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-[#10B981] rounded-full flex items-center justify-center text-white text-xs">✓</span><span class="font-medium text-emerald-800 text-sm">Short-term (2025)</span></div><span class="bg-[#10B981] text-white text-xs px-2 py-0.5 rounded-full font-medium">On Track</span></div><p class="text-xs text-emerald-700 mt-2">25% reduction Scope 1 & 2 • <strong>92% complete</strong></p></div>
+                            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl"><div class="flex justify-between items-center"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold">2</span><span class="font-medium text-amber-800 text-sm">Medium-term (2030)</span></div><span class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">In Progress</span></div><p class="text-xs text-amber-700 mt-2">50% reduction all scopes (SBTi) • <strong>38% complete</strong></p></div>
+                            <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl"><div class="flex justify-between items-center"><div class="flex items-center gap-2"><span class="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold">3</span><span class="font-medium text-gray-700 text-sm">Long-term (2040)</span></div><span class="bg-gray-300 text-gray-600 text-xs px-2 py-0.5 rounded-full font-medium">Planned</span></div><p class="text-xs text-gray-500 mt-2">Net Zero emissions • Science-based target validated</p></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Offsetting & Credits -->
                 <div class="card reveal">
-                    <div class="p-5 border-b border-surface-200 flex justify-between items-center">
+                    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
                         <h2 class="font-bold text-gray-900 text-[17px]">Offsetting & Credits</h2>
-                        <button class="text-sm text-brand-500 font-semibold hover:text-brand-700 transition">Purchase Credits</button>
+                        <button class="text-sm text-[#10B981] font-semibold hover:text-[#047857] transition">Purchase Credits</button>
                     </div>
                     <div class="p-5">
                         <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div class="text-center p-3 bg-brand-50 rounded-xl">
-                                <div class="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                    <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                                </div>
-                                <p class="text-xl font-bold text-brand-700">520</p>
-                                <p class="text-xs text-gray-500">Forestry</p>
-                            </div>
-                            <div class="text-center p-3 bg-blue-50 rounded-xl">
-                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                </div>
-                                <p class="text-xl font-bold text-blue-700">216</p>
-                                <p class="text-xs text-gray-500">Renewable Energy</p>
-                            </div>
-                            <div class="text-center p-3 bg-amber-50 rounded-xl">
-                                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945"/></svg>
-                                </div>
-                                <p class="text-xl font-bold text-amber-700">100</p>
-                                <p class="text-xs text-gray-500">Other Projects</p>
-                            </div>
+                            <div class="text-center p-3 bg-emerald-50 rounded-xl"><div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-2"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg></div><p class="text-xl font-bold text-emerald-700">520</p><p class="text-xs text-gray-500">Forestry</p></div>
+                            <div class="text-center p-3 bg-blue-50 rounded-xl"><div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><p class="text-xl font-bold text-blue-700">216</p><p class="text-xs text-gray-500">Renewable Energy</p></div>
+                            <div class="text-center p-3 bg-amber-50 rounded-xl"><div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2"><svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945"/></svg></div><p class="text-xl font-bold text-amber-700">100</p><p class="text-xs text-gray-500">Other Projects</p></div>
+                        </div>
+                        <!-- Agent queued purchase highlight -->
+                        <div class="p-3 bg-emerald-50 border border-emerald-300 rounded-xl mb-3">
+                            <div class="flex items-center gap-2"><div class="agent-live-dot" style="width:6px;height:6px;flex-shrink:0;"></div><p class="text-xs font-semibold text-emerald-800">Agent: 6t purchase queued for approval</p></div>
+                            <p class="text-xs text-emerald-700 mt-1">Gold Standard · $18/t · $108 total — closes 2025 annual gap. Approve in HITL queue above.</p>
                         </div>
                         <div class="space-y-2">
-                            <div class="flex justify-between p-2.5 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Total Credits Purchased</span><span class="font-semibold">836 tCO2e</span></div>
-                            <div class="flex justify-between p-2.5 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Credits Retired</span><span class="font-semibold">425 tCO2e</span></div>
-                            <div class="flex justify-between p-2.5 bg-surface-50 rounded-xl text-sm hover:bg-surface-100 transition"><span class="text-gray-600">Avg. Cost per Tonne</span><span class="font-semibold">$24.50</span></div>
-                            <div class="flex justify-between p-2.5 bg-brand-50 border border-brand-200 rounded-xl text-sm"><span class="text-brand-700 font-medium">Total Investment YTD</span><span class="font-bold text-brand-700">$20,482</span></div>
+                            <div class="flex justify-between p-2.5 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Total Credits Purchased</span><span class="font-semibold">836 tCO₂e</span></div>
+                            <div class="flex justify-between p-2.5 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Credits Retired</span><span class="font-semibold">425 tCO₂e</span></div>
+                            <div class="flex justify-between p-2.5 bg-[#F8FAFC] rounded-xl text-sm hover:bg-gray-50 transition"><span class="text-gray-600">Avg. Cost per Tonne</span><span class="font-semibold">$24.50</span></div>
+                            <div class="flex justify-between p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm"><span class="text-emerald-700 font-medium">Total Investment YTD</span><span class="font-bold text-emerald-700">$20,482</span></div>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-surface-200">
-                            <p class="text-xs text-gray-400 mb-2">Verified Offset Providers</p>
-                            <div class="flex gap-2 flex-wrap">
-                                <span class="px-2 py-1 bg-surface-100 text-gray-600 text-xs rounded-lg font-medium">Verra VCS</span>
-                                <span class="px-2 py-1 bg-surface-100 text-gray-600 text-xs rounded-lg font-medium">Gold Standard</span>
-                                <span class="px-2 py-1 bg-surface-100 text-gray-600 text-xs rounded-lg font-medium">ACR</span>
-                                <span class="px-2 py-1 bg-surface-100 text-gray-600 text-xs rounded-lg font-medium">CAR</span>
-                            </div>
-                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100"><p class="text-xs text-gray-400 mb-2">Verified Offset Providers</p><div class="flex gap-2 flex-wrap"><span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">Verra VCS</span><span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">Gold Standard</span><span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">ACR</span><span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">CAR</span></div></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══ SECTION E & F: REPORTING + SUPPLY CHAIN ═══ -->
+            <!-- REPORTING + SUPPLY CHAIN -->
             <div class="grid grid-cols-2 gap-4">
-
-                <!-- E: Reporting & Disclosure Center -->
                 <div class="card reveal">
-                    <div class="p-5 border-b border-surface-200">
-                        <h2 class="font-bold text-gray-900 text-[17px]">Reporting & Disclosure Center</h2>
-                    </div>
+                    <div class="p-5 border-b border-gray-100"><h2 class="font-bold text-gray-900 text-[17px]">Reporting & Disclosure Center</h2></div>
                     <div class="p-5">
                         <div class="grid grid-cols-2 gap-3 mb-4">
-                            <button class="p-4 border border-gray-200 rounded-xl hover:bg-brand-50 hover:border-brand-300 text-left transition-all">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    <span class="font-medium text-sm">Sustainability Report</span>
-                                </div>
-                                <p class="text-xs text-gray-500">Annual GRI-aligned</p>
-                            </button>
-                            <button class="p-4 border border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 text-left transition-all">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    <span class="font-medium text-sm">CDP Response</span>
-                                </div>
-                                <p class="text-xs text-gray-500">Climate disclosure</p>
-                            </button>
-                            <button class="p-4 border border-gray-200 rounded-xl hover:bg-purple-50 hover:border-purple-300 text-left transition-all">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                    <span class="font-medium text-sm">TCFD Disclosure</span>
-                                </div>
-                                <p class="text-xs text-gray-500">Climate risk reporting</p>
-                            </button>
-                            <button class="p-4 border border-amber-200 bg-amber-50 rounded-xl hover:bg-amber-100 text-left transition-all">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                    <span class="font-medium text-sm text-amber-900">Carbon Passport</span>
-                                </div>
-                                <p class="text-xs text-amber-700">EU CBAM Compliant</p>
-                            </button>
+                            <button class="p-4 border border-gray-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 text-left transition-all"><div class="flex items-center gap-2 mb-1"><svg class="w-4 h-4 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="font-medium text-sm">Sustainability Report</span></div><p class="text-xs text-gray-500">Annual GRI-aligned</p></button>
+                            <button class="p-4 border border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 text-left transition-all"><div class="flex items-center gap-2 mb-1"><svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span class="font-medium text-sm">CDP Response</span></div><p class="text-xs text-gray-500">Climate disclosure</p></button>
+                            <button class="p-4 border border-gray-200 rounded-xl hover:bg-purple-50 hover:border-purple-300 text-left transition-all"><div class="flex items-center gap-2 mb-1"><svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><span class="font-medium text-sm">TCFD Disclosure</span></div><p class="text-xs text-gray-500">Climate risk reporting</p></button>
+                            <button class="p-4 border border-amber-200 bg-amber-50 rounded-xl hover:bg-amber-100 text-left transition-all"><div class="flex items-center gap-2 mb-1"><svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg><span class="font-medium text-sm text-amber-900">Carbon Passport</span></div><p class="text-xs text-amber-700">EU CBAM Compliant</p></button>
                         </div>
-                        <div class="p-4 bg-surface-50 rounded-xl border border-surface-200">
+                        <div class="p-4 bg-[#F8FAFC] rounded-xl border border-gray-100">
                             <p class="text-xs font-semibold text-gray-700 mb-2.5">Filing Calendar</p>
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between"><span class="text-gray-600">Annual Report</span><span class="font-medium">Mar 31, 2025</span></div>
                                 <div class="flex justify-between"><span class="text-gray-600">CDP Submission</span><span class="text-red-500 font-medium">Jul 31, 2025</span></div>
-                                <div class="flex justify-between"><span class="text-gray-600">EU CBAM Report</span><span class="text-red-500 font-medium">Jan 31, 2025</span></div>
+                                <div class="flex justify-between"><span class="text-gray-600 flex items-center gap-1.5">EU CBAM / CSRD Report <span class="text-[10px] bg-red-100 text-red-600 px-1 py-0.5 rounded font-bold">19 days</span></span><span class="text-red-500 font-medium">Jan 31, 2025</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- F: Supply Chain Sustainability (CORRECTED NAME) -->
                 <div class="card reveal">
-                    <div class="p-5 border-b border-surface-200 flex justify-between items-center">
+                    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
                         <h2 class="font-bold text-gray-900 text-[17px]">Supply Chain Sustainability</h2>
-                        <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">2 High Risk</span>
+                        <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">2 High Risk + 3 CSRD gap</span>
                     </div>
-                    <div class="p-5">
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center p-3 bg-surface-50 rounded-xl hover:bg-surface-100 transition">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-700 font-bold text-sm">A</div>
-                                    <div><p class="font-medium text-sm">Acme Materials Co.</p><p class="text-xs text-gray-500">Scope 3: 124 tCO2e</p></div>
-                                </div>
-                                <span class="bg-brand-100 text-brand-700 text-xs px-2 py-1 rounded-full font-medium">Score: A5</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-bold text-sm">G</div>
-                                    <div><p class="font-medium text-sm">GlobalParts Inc.</p><p class="text-xs text-amber-700">Scope 3: 87 tCO2e</p></div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-medium">High risk</span>
-                                    <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">Score: A5</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-red-50 border border-red-200 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-700 font-bold text-sm">M</div>
-                                    <div><p class="font-medium text-sm">MegaSupply Ltd.</p><p class="text-xs text-red-700">Scope 3: 1,198 tCO2e</p></div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">Action needed</span>
-                                    <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">Score: A5</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-surface-50 rounded-xl hover:bg-surface-100 transition">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-sm">T</div>
-                                    <div><p class="font-medium text-sm">TechComponents</p><p class="text-xs text-gray-500">Scope 3: 76 tCO2e</p></div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="bg-gray-200 text-gray-500 text-xs px-2 py-0.5 rounded-full">Awaiting</span>
-                                    <span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full">Pending</span>
-                                </div>
-                            </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-xl hover:bg-gray-50 transition"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm">A</div><div><p class="font-medium text-sm">Acme Materials Co.</p><p class="text-xs text-gray-500">Scope 3: 124 tCO₂e</p></div></div><span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full font-medium">Score: A5</span></div>
+                        <div class="flex justify-between items-center p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                            <div class="flex items-center gap-3"><div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-bold text-sm">G</div><div><p class="font-medium text-sm">GlobalParts Inc.</p><p class="text-xs text-amber-700 flex items-center gap-1">Scope 3: 87 tCO₂e <span class="text-[10px] bg-amber-200 text-amber-800 px-1 rounded font-bold">CSRD pending</span></p></div></div>
+                            <div class="flex items-center gap-2"><span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-medium">High risk</span><span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">No response</span></div>
                         </div>
-                        <button class="w-full mt-4 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-brand-300 hover:text-brand-500 hover:bg-brand-50/50 transition-all">+ Send assessment</button>
+                        <div class="flex justify-between items-center p-3 bg-red-50 border border-red-200 rounded-xl">
+                            <div class="flex items-center gap-3"><div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-700 font-bold text-sm">M</div><div><p class="font-medium text-sm">MegaSupply Ltd.</p><p class="text-xs text-red-700 flex items-center gap-1">Scope 3: 1,198 tCO₂e <span class="text-[10px] bg-red-200 text-red-800 px-1 rounded font-bold">CSRD pending</span></p></div></div>
+                            <div class="flex items-center gap-2"><span class="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full font-medium">Action needed</span><span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">No response</span></div>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-xl hover:bg-gray-50 transition">
+                            <div class="flex items-center gap-3"><div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-sm">T</div><div><p class="font-medium text-sm">TechComponents</p><p class="text-xs text-gray-500 flex items-center gap-1">Scope 3: 76 tCO₂e <span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded font-bold">CSRD pending</span></p></div></div>
+                            <div class="flex items-center gap-2"><span class="bg-gray-200 text-gray-500 text-xs px-2 py-0.5 rounded-full">Awaiting</span><span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full">Pending</span></div>
+                        </div>
+                        <button class="w-full mt-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-emerald-300 hover:text-emerald-500 hover:bg-emerald-50/50 transition-all">+ Send assessment</button>
                     </div>
                 </div>
             </div>
-
         </div><!-- END LEFT COLUMN -->
 
-        <!-- ──────────── RIGHT COLUMN ──────────── -->
+        <!-- RIGHT COLUMN -->
         <div class="col-span-3 space-y-4">
 
-            <!-- G: Ask CloudCFO AI -->
-            <div class="bg-gradient-to-br from-brand-800 to-brand-950 rounded-2xl p-5 text-white noise-bg">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-brand-400 to-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+            <!-- ═══ AGENT COPILOT PANEL ═══ -->
+            <div class="copilot-panel p-5 sticky top-[72px]">
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15)">
+                            <svg class="w-5 h-5 text-[#34d399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-white text-sm">CloudCFO Agent · ESG</h3>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <div class="agent-live-dot" style="width:6px;height:6px;"></div>
+                                <p class="text-xs text-gray-400">Active · SBTi pathway monitor</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-white">Ask CloudCFO AI</h3>
-                        <p class="text-xs text-brand-200">Set up your AI Engine in 3 Simple Steps</p>
+
+                    <!-- Narrative -->
+                    <div class="copilot-message mb-3">
+                        You're <span class="font-semibold text-amber-300">4% over your 2025 SBTi pathway</span> at 55.2 tCO₂e. Air travel is the primary driver — the Geneva trip added 3.1t. Cloud emissions are down <span class="font-semibold text-emerald-300">18%</span> thanks to the GCP migration — a genuine win. Three CSRD supplier responses are outstanding with 19 days left. A 6t Gold Standard offset purchase ($108) closes the annual gap. All three actions are queued in the HITL panel.
                     </div>
+
+                    <!-- Anomalies -->
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Anomalies</div>
+                    <div class="space-y-2 mb-4">
+                        <div class="copilot-anomaly-item d"><span class="copilot-anomaly-label">Scope 3 cap breach</span>Air travel at 82% of annual Scope 3 budget with 6 weeks remaining. One more long-haul = breach.</div>
+                        <div class="copilot-anomaly-item w"><span class="copilot-anomaly-label">CSRD deadline risk</span>GlobalParts, MegaSupply, TechComponents — 45 days no response. Jan 31 is 19 days away.</div>
+                        <div class="copilot-anomaly-item g"><span class="copilot-anomaly-label">Offset opportunity</span>6t Gold Standard at $18/t ($108 total) closes 2025 gap. Window closes mid-Jan.</div>
+                    </div>
+
+                    <!-- ESG Passport draft -->
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        ESG passport — Nov draft
+                        <span class="px-1.5 py-0.5 rounded-full text-xs font-medium" style="background:rgba(16,185,129,.25);color:#6ee7b7;">AI-drafted</span>
+                    </div>
+                    <div class="draft-box mb-4">
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            <span class="font-semibold text-white">Acme Corp, Nov 2025.</span> Total emissions: 55.2 tCO₂e YTD vs 53.0t SBTi target (+4.2%). Primary overage: Scope 3 air travel (Geneva conference, 3.1t). Cloud emissions reduced 18% via GCP low-carbon migration — partially offsetting travel impact. Remediation: 6t offset purchase + Q4 travel advisory. CSRD data collection 70% complete (3 suppliers outstanding, Jan 31 deadline). Net Zero roadmap: on track for 2025 milestone (92% complete).
+                        </p>
+                        <button class="mt-3 w-full py-2 text-xs font-medium rounded-xl transition-all" style="border:1px solid rgba(16,185,129,.3);color:#34d399;" onmouseover="this.style.background='rgba(16,185,129,.1)'" onmouseout="this.style.background=''" onclick="copyPassport()">Copy ESG passport to clipboard</button>
+                    </div>
+
+                    <!-- Chat -->
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ask the agent</div>
+                    <div class="space-y-2 mb-3">
+                        <button class="w-full text-left px-3 py-2 rounded-xl text-xs text-gray-300 transition-all flex items-center gap-2" style="background:rgba(255,255,255,.05);" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="prefill('What is my Scope 3 breakdown by category?')"><svg class="w-3 h-3 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>Scope 3 breakdown by category</button>
+                        <button class="w-full text-left px-3 py-2 rounded-xl text-xs text-gray-300 transition-all flex items-center gap-2" style="background:rgba(255,255,255,.05);" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="prefill('Draft the CSRD second request for the 3 non-responding suppliers')"><svg class="w-3 h-3 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>Draft CSRD second request</button>
+                        <button class="w-full text-left px-3 py-2 rounded-xl text-xs text-gray-300 transition-all flex items-center gap-2" style="background:rgba(255,255,255,.05);" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'" onclick="prefill('How does my ESG score compare to industry benchmarks?')"><svg class="w-3 h-3 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>Compare vs industry benchmark</button>
+                    </div>
+                    <div class="relative mb-3">
+                        <input type="text" id="copilotInput" placeholder="Ask about your ESG position..." class="copilot-input" onkeydown="if(event.key==='Enter')sendChat()">
+                        <button class="copilot-send" onclick="sendChat()"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>
+                    </div>
+                    <div id="chatResponses" class="space-y-2 max-h-36 overflow-y-auto"></div>
+
+                    <!-- Memory -->
+                    <div class="mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,.1)">
+                        <p class="text-xs text-gray-500 mb-1.5">Agent memory scope</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="memory-pill">SBTi pathway</span>
+                            <span class="memory-pill">Supplier registry</span>
+                            <span class="memory-pill">CSRD: Jan 31</span>
+                            <span class="memory-pill">GCP migration</span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-gray-600 text-center mt-3">ESG Agent can make mistakes. Review all submissions.</p>
                 </div>
-                <p class="text-xs text-brand-200 mb-2">More precise questions work better. Try searching for:</p>
-                <div class="space-y-1.5 mb-3">
-                    <button class="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/15 rounded-lg text-sm text-brand-100 transition">Show me this week's biggest expenses</button>
-                    <button class="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/15 rounded-lg text-sm text-brand-100 transition">Summarize my financial health in one sentence</button>
-                    <button class="w-full text-left px-3 py-2 bg-white/10 hover:bg-white/15 rounded-lg text-sm text-brand-100 transition">Find duplicate transactions</button>
-                </div>
-                <div class="relative">
-                    <input type="text" placeholder="Ask about your finances" class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm placeholder-brand-300 focus:outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-400 transition">
-                    <button class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-brand-500 rounded-md hover:bg-brand-400 transition">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </button>
-                </div>
-                <p class="text-[10px] text-brand-300 mt-2">CFO AI can make mistakes. Check our Terms & Conditions.</p>
             </div>
 
-            <!-- H: Connected Integrations — CLIMATIQ ONLY -->
+            <!-- CONNECTED INTEGRATIONS -->
             <div class="card p-5 reveal">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-gray-900 text-sm">Connected Integrations</h3>
-                    <button class="text-xs text-brand-500 font-medium hover:text-brand-700 transition">Manage Integrations</button>
-                </div>
+                <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-gray-900 text-sm">Connected Integrations</h3><button class="text-xs text-[#10B981] font-medium hover:text-[#047857] transition">Manage</button></div>
                 <div class="space-y-2">
-                    <div class="flex justify-between items-center p-3 bg-surface-50 rounded-xl hover:bg-surface-100 transition">
+                    <div class="flex justify-between items-center p-3 bg-[#F8FAFC] rounded-xl hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
-                            <div class="climatiq-logo">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-sm">Climatiq</p>
-                                <p class="text-xs text-gray-400">Emission factor API</p>
-                            </div>
+                            <div class="climatiq-logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+                            <div><p class="font-medium text-sm">Climatiq</p><p class="text-xs text-gray-400">Emission factor API</p></div>
                         </div>
-                        <span class="text-brand-500 text-xs flex items-center gap-1.5 font-medium">
-                            <span class="w-2 h-2 bg-brand-500 rounded-full pulse-glow"></span>Connected
-                        </span>
+                        <span class="text-[#10B981] text-xs flex items-center gap-1.5 font-medium"><span class="w-2 h-2 bg-[#10B981] rounded-full pulse-glow"></span>Connected</span>
                     </div>
                 </div>
             </div>
 
-            <!-- I: Auto-Discovery (with ≥2 Missing Data items) -->
+            <!-- AUTO-DISCOVERY -->
             <div class="card p-5 reveal">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-bold text-gray-900 text-sm">Auto-Discovery</h3>
-                    <span class="bg-brand-100 text-brand-700 text-xs px-2 py-0.5 rounded-full font-medium">3 New</span>
-                </div>
+                <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-gray-900 text-sm">Auto-Discovery</h3><span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium">3 New</span></div>
                 <div class="space-y-2.5">
-                    <!-- Item 1: Flight Review -->
                     <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Travel</span>
-                            <span class="text-xs text-gray-400">Dec 22</span>
-                        </div>
+                        <div class="flex items-center gap-2 mb-1"><span class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Travel</span><span class="text-xs text-gray-400">Dec 22</span></div>
                         <p class="text-sm font-medium text-gray-800">Flight: LAX → JFK</p>
-                        <div class="flex justify-between items-center mt-1.5">
-                            <span class="text-xs text-gray-500">AI: 2.4 tCO2e (92% conf)</span>
-                            <button class="text-xs bg-brand-500 text-white px-3 py-1 rounded-md font-medium hover:bg-brand-600 transition">Review</button>
-                        </div>
+                        <div class="flex justify-between items-center mt-1.5"><span class="text-xs text-gray-500">AI: 2.4 tCO₂e (92% conf)</span><button class="text-xs bg-[#10B981] text-white px-3 py-1 rounded-md font-medium hover:bg-[#047857] transition">Review</button></div>
                     </div>
-                    <!-- Item 2: Utility Auto-added -->
-                    <div class="p-3 bg-surface-50 rounded-xl">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="bg-brand-100 text-brand-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Added</span>
-                            <span class="bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Energy</span>
-                            <span class="text-xs text-gray-400">Dec 20</span>
-                        </div>
+                    <div class="p-3 bg-[#F8FAFC] rounded-xl">
+                        <div class="flex items-center gap-2 mb-1"><span class="bg-emerald-100 text-emerald-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Added</span><span class="bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Energy</span><span class="text-xs text-gray-400">Dec 20</span></div>
                         <p class="text-sm font-medium text-gray-800">Utility Bill - Q4</p>
-                        <p class="text-xs text-brand-500 mt-1">Auto-categorized!</p>
+                        <p class="text-xs text-[#10B981] mt-1">Auto-categorized!</p>
                     </div>
-                    <!-- Item 3: MISSING DATA — Hotel receipt -->
                     <div class="p-3 bg-pink-50 border border-pink-200 rounded-xl">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="bg-pink-200 text-pink-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Missing Info</span>
-                            <span class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Travel</span>
-                        </div>
+                        <div class="flex items-center gap-2 mb-1"><span class="bg-pink-200 text-pink-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Missing Info</span><span class="bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Travel</span></div>
                         <p class="text-sm font-medium text-gray-800">Nov Trip — Hotel receipt needed</p>
-                        <div class="flex justify-between items-center mt-1.5">
-                            <span class="text-xs text-pink-600">Required for Scope 3 calculation</span>
-                            <button class="text-xs bg-amber-500 text-white px-3 py-1 rounded-md font-medium hover:bg-amber-600 transition">Upload receipt</button>
-                        </div>
+                        <div class="flex justify-between items-center mt-1.5"><span class="text-xs text-pink-600">Required for Scope 3 calc</span><button class="text-xs bg-amber-500 text-white px-3 py-1 rounded-md font-medium hover:bg-amber-600 transition">Upload</button></div>
                     </div>
-                    <!-- Item 4: MISSING DATA — Office Supplies invoice -->
                     <div class="p-3 bg-pink-50 border border-pink-200 rounded-xl">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="bg-pink-200 text-pink-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Missing Info</span>
-                            <span class="bg-gray-200 text-gray-600 text-xs px-1.5 py-0.5 rounded-md font-medium">Procurement</span>
-                        </div>
+                        <div class="flex items-center gap-2 mb-1"><span class="bg-pink-200 text-pink-700 text-xs px-1.5 py-0.5 rounded-md font-medium">Missing Info</span><span class="bg-gray-200 text-gray-600 text-xs px-1.5 py-0.5 rounded-md font-medium">Procurement</span></div>
                         <p class="text-sm font-medium text-gray-800">Dec Office Supplies — Invoice unreadable</p>
-                        <div class="flex justify-between items-center mt-1.5">
-                            <span class="text-xs text-pink-600">Amount field could not be extracted</span>
-                            <button class="text-xs bg-amber-500 text-white px-3 py-1 rounded-md font-medium hover:bg-amber-600 transition">Upload receipt</button>
-                        </div>
+                        <div class="flex justify-between items-center mt-1.5"><span class="text-xs text-pink-600">Amount could not be extracted</span><button class="text-xs bg-amber-500 text-white px-3 py-1 rounded-md font-medium hover:bg-amber-600 transition">Upload</button></div>
                     </div>
                 </div>
             </div>
 
-            <!-- J: Data Information Panel -->
+            <!-- DATA INFORMATION -->
             <div class="card p-5 reveal">
                 <div class="space-y-3">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">Data Completeness</p>
-                            <p class="text-xs text-gray-400">94% of required fields</p>
-                        </div>
-                    </div>
-                    <div class="border-t border-surface-200 pt-2">
-                        <p class="text-xs text-gray-400">Last Data Refresh</p>
-                        <p class="text-sm font-medium text-gray-700">Dec 28, 2024 • 2:30 PM</p>
-                    </div>
-                    <div class="border-t border-surface-200 pt-2">
-                        <p class="text-xs text-gray-400 mb-1">Emission Factor Sources</p>
-                        <div class="flex gap-1.5 flex-wrap">
-                            <span class="px-2 py-0.5 bg-surface-100 text-gray-600 text-xs rounded font-medium">EPA GHG</span>
-                            <span class="px-2 py-0.5 bg-surface-100 text-gray-600 text-xs rounded font-medium">DEFRA 2024</span>
-                            <span class="px-2 py-0.5 bg-surface-100 text-gray-600 text-xs rounded font-medium">GHG Protocol</span>
-                            <span class="px-2 py-0.5 bg-surface-100 text-gray-600 text-xs rounded font-medium">IPCC AR6</span>
-                        </div>
-                    </div>
-                    <div class="border-t border-surface-200 pt-2">
-                        <p class="text-xs text-gray-400">Methodology</p>
-                        <p class="text-sm font-medium text-gray-700">GHG Protocol Corporate Standard</p>
-                    </div>
-                    <div class="border-t border-surface-200 pt-2 flex items-center gap-2">
-                        <span class="bg-brand-500 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 font-medium">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            Third-Party Verified
-                        </span>
-                        <span class="text-xs text-gray-400">by EcoAudit Inc.</span>
-                    </div>
+                    <div class="flex items-center gap-2"><svg class="w-4 h-4 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div><p class="text-sm font-semibold text-gray-900">Data Completeness</p><p class="text-xs text-gray-400">94% of required fields</p></div></div>
+                    <div class="border-t border-gray-100 pt-2"><p class="text-xs text-gray-400">Last Data Refresh</p><p class="text-sm font-medium text-gray-700">Dec 28, 2024 • 2:30 PM</p></div>
+                    <div class="border-t border-gray-100 pt-2"><p class="text-xs text-gray-400 mb-1">Emission Factor Sources</p><div class="flex gap-1.5 flex-wrap"><span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded font-medium">EPA GHG</span><span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded font-medium">DEFRA 2024</span><span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded font-medium">GHG Protocol</span><span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded font-medium">IPCC AR6</span></div></div>
+                    <div class="border-t border-gray-100 pt-2"><p class="text-xs text-gray-400">Methodology</p><p class="text-sm font-medium text-gray-700">GHG Protocol Corporate Standard</p></div>
+                    <div class="border-t border-gray-100 pt-2 flex items-center gap-2"><span class="bg-[#10B981] text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1 font-medium"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Third-Party Verified</span><span class="text-xs text-gray-400">by EcoAudit Inc.</span></div>
                 </div>
             </div>
-
         </div><!-- END RIGHT COLUMN -->
-
     </div><!-- END MAIN GRID -->
-
 </main>
 
-<!-- ═══════════════════════════════════════════════════ -->
-<!-- SCRIPTS                                            -->
-<!-- ═══════════════════════════════════════════════════ -->
 <script>
-    // ── Scope Donut Chart ──
-    new Chart(document.getElementById('scopeChart').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Scope 1', 'Scope 2', 'Scope 3'],
-            datasets: [{
-                data: [187, 312, 748],
-                backgroundColor: ['#10B981', '#3b82f6', '#f59e0b'],
-                borderWidth: 0,
-                cutout: '65%'
-            }]
-        },
-        options: {
-            responsive: false,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
-        }
-    });
+    // Header scroll
+    window.addEventListener('scroll', () => { document.getElementById('header').classList.toggle('shadow-sm', window.scrollY > 50); });
 
-    // ── Monthly Trend Chart ──
-    new Chart(document.getElementById('trendChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-            datasets: [
-                {
-                    label: '2024',
-                    data: [120,115,125,110,105,95,100,98,92,90,88,85],
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16,185,129,0.08)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 2,
-                    borderWidth: 2,
-                },
-                {
-                    label: '2023',
-                    data: [145,140,150,135,130,125,128,122,118,115,110,108],
-                    borderColor: '#cbd5e1',
-                    borderDash: [5,5],
-                    fill: false,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    borderWidth: 1.5,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10, family: 'Inter' }, padding: 12 } }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' } } },
-                y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 9, family: 'Inter' } } }
-            }
-        }
-    });
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) { setTimeout(() => entry.target.classList.add('visible'), index * 80); observer.unobserve(entry.target); }
+        });
+    }, { threshold: 0.05 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // ── Carbon Accounting Tabs ──
+    // Carbon tabs
     function switchCarbonTab(btn, id) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -803,54 +725,97 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // ── Score Tabs ──
+    // Score tabs
     function switchScoreTab(btn, id) {
         document.querySelectorAll('.score-tab-btn').forEach(b => {
-            b.classList.remove('active');
-            b.classList.add('text-gray-400');
-            b.classList.remove('text-brand-500');
-            const ind = b.querySelector('.score-indicator');
-            if (ind) ind.remove();
+            b.classList.remove('active'); b.classList.add('text-gray-400'); b.classList.remove('text-[#10B981]');
+            const ind = b.querySelector('.score-indicator'); if (ind) ind.remove();
         });
         document.querySelectorAll('.score-tab-content').forEach(c => c.style.display = 'none');
-        btn.classList.add('active');
-        btn.classList.remove('text-gray-400');
-        btn.classList.add('text-brand-500');
+        btn.classList.add('active'); btn.classList.remove('text-gray-400'); btn.classList.add('text-[#10B981]');
         const indicator = document.createElement('span');
-        indicator.className = 'absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t score-indicator';
+        indicator.className = 'absolute bottom-0 left-0 right-0 h-[2px] bg-[#10B981] rounded-t score-indicator';
         btn.appendChild(indicator);
         document.getElementById(id).style.display = 'block';
     }
 
-    // ── Scores Toggle ──
+    // Scores toggle
     function toggleScores() {
         const body = document.getElementById('scores-body');
         const chevron = document.getElementById('scores-chevron');
-        if (body.style.display === 'none') {
-            body.style.display = 'block';
-            chevron.style.transform = 'rotate(0deg)';
-        } else {
-            body.style.display = 'none';
-            chevron.style.transform = 'rotate(-90deg)';
-        }
+        if (body.style.display === 'none') { body.style.display = 'block'; chevron.style.transform = 'rotate(0deg)'; }
+        else { body.style.display = 'none'; chevron.style.transform = 'rotate(-90deg)'; }
     }
 
-    // ── Header Scroll Shadow ──
-    window.addEventListener('scroll', () => {
-        document.getElementById('header').classList.toggle('shadow-sm', window.scrollY > 50);
+    // HITL
+    function resolveHITL(id, action) {
+        const card = document.getElementById(id);
+        card.innerHTML = `<div class="flex items-center gap-2 text-emerald-600 text-sm font-medium w-full"><svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>${action} — recorded by agent</div>`;
+        card.style.background = '#ecfdf5'; card.style.borderColor = '#6ee7b7';
+    }
+    function dismissHITL(id) { document.getElementById(id).classList.add('hitl-done'); }
+    function resolveAnomaly(btn) { const card = btn.closest('.anomaly-card'); card.style.opacity = '.45'; card.querySelectorAll('button').forEach(b => b.disabled = true); card.querySelector('.anomaly-label').textContent = 'RESOLVED'; }
+
+    // Charts
+    new Chart(document.getElementById('scopeChart').getContext('2d'), {
+        type: 'doughnut',
+        data: { labels:['Scope 1','Scope 2','Scope 3'], datasets:[{data:[187,312,748], backgroundColor:['#10B981','#3b82f6','#f59e0b'], borderWidth:0, cutout:'65%'}] },
+        options: { responsive:false, maintainAspectRatio:false, plugins:{legend:{display:false}} }
     });
 
-    // ── Scroll Reveal ──
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-                setTimeout(() => entry.target.classList.add('visible'), index * 80);
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.05 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
+    new Chart(document.getElementById('trendChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            datasets: [
+                { label:'2024', data:[120,115,125,110,105,95,100,98,92,90,88,85], borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.08)', fill:true, tension:0.4, pointRadius:2, borderWidth:2 },
+                { label:'2023', data:[145,140,150,135,130,125,128,122,118,115,110,108], borderColor:'#cbd5e1', borderDash:[5,5], fill:false, tension:0.4, pointRadius:0, borderWidth:1.5 }
+            ]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10,family:'Inter'},padding:12}}}, scales:{x:{grid:{display:false},ticks:{font:{size:9,family:'Inter'}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:9,family:'Inter'}}}} }
+    });
 
+    // Copilot
+    function prefill(text) { document.getElementById('copilotInput').value = text; document.getElementById('copilotInput').focus(); }
+    function sendChat() {
+        const input = document.getElementById('copilotInput');
+        const val = input.value.trim(); if (!val) return;
+        const container = document.getElementById('chatResponses');
+        const userMsg = document.createElement('div');
+        userMsg.className = 'px-3 py-2 rounded-xl text-xs text-right text-gray-200';
+        userMsg.style.background = 'rgba(16,185,129,.15)';
+        userMsg.textContent = val; container.appendChild(userMsg);
+        const typing = document.createElement('div');
+        typing.className = 'px-3 py-2 rounded-xl text-xs flex items-center gap-1.5';
+        typing.style.background = 'rgba(255,255,255,.05)';
+        typing.innerHTML = '<span class="text-gray-400 text-xs">Agent thinking</span><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+        container.appendChild(typing); container.scrollTop = container.scrollHeight; input.value = '';
+        const responses = {
+            default: "Based on your 14-month ESG history and current SBTi pathway, your most urgent action is the Q4 travel advisory. The Geneva trip pushed you 4% above target — any further long-haul flights before Dec 31 would make the annual breach irreversible without significant additional offsetting.",
+            scope3: "Your Scope 3 breakdown: Business Travel 298t (24%), Supply Chain 287t (23%), Employee Commuting 156t (12.5%), Data Centers 94t (7.5%). Travel is the dominant and fastest-growing category — driven by the Geneva conference (3.1t) and two other client visits. Supply chain is the highest-uncertainty category pending CSRD supplier data.",
+            csrd: "Draft ready: 'Dear [Supplier], This is a formal second request for your 2024 emissions data per our CSRD obligations (EU Directive 2022/2464). Your data is required by January 20, 2025 to meet our January 31 filing deadline. Failure to respond may result in regulatory escalation and reassessment of our supplier relationship.' — Ready to send to GlobalParts, MegaSupply, and TechComponents on your approval.",
+            benchmark: "Your ESG score of 78/100 sits in the B tier. Industry benchmark for your sector is 71/100 — you're 10% above average. Environmental score (82) is your strongest dimension; Social (75) has room to improve on supply chain compliance. Your carbon intensity of 14.7 tCO₂e/$M is 20% better than industry average, driven by the renewable energy transition."
+        };
+        setTimeout(() => {
+            container.removeChild(typing);
+            const agentMsg = document.createElement('div');
+            agentMsg.className = 'px-3 py-2 rounded-xl text-xs text-gray-300 leading-relaxed';
+            agentMsg.style.cssText = 'background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);';
+            const key = val.toLowerCase().includes('scope 3') || val.toLowerCase().includes('breakdown') ? 'scope3'
+                      : val.toLowerCase().includes('csrd') || val.toLowerCase().includes('request') ? 'csrd'
+                      : val.toLowerCase().includes('benchmark') || val.toLowerCase().includes('industry') || val.toLowerCase().includes('compar') ? 'benchmark'
+                      : 'default';
+            agentMsg.textContent = responses[key]; container.appendChild(agentMsg); container.scrollTop = container.scrollHeight;
+        }, 1300);
+    }
+    function copyPassport() {
+        const text = "Acme Corp, Nov 2025. Total emissions: 55.2 tCO₂e YTD vs 53.0t SBTi target (+4.2%). Primary overage: Scope 3 air travel (Geneva conference, 3.1t). Cloud emissions reduced 18% via GCP low-carbon migration. Remediation: 6t offset purchase + Q4 travel advisory. CSRD data collection 70% complete (3 suppliers outstanding, Jan 31 deadline). Net Zero roadmap: on track for 2025 milestone (92% complete).";
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target;
+            btn.textContent = 'Copied!'; btn.style.color = '#6ee7b7';
+            setTimeout(() => { btn.textContent = 'Copy ESG passport to clipboard'; btn.style.color = ''; }, 2000);
+        });
+    }
+</script>
 </body>
 </html>
